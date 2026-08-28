@@ -202,7 +202,11 @@ async function setDoc(path, obj) {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(body)
   });
-  if (!res.ok) throw new Error('HTTP ' + res.status);
+  if (!res.ok) {
+    let detail = '';
+    try { detail = await res.text(); } catch (e2) {}
+    throw new Error('HTTP ' + res.status + (detail ? ' - ' + detail.slice(0, 200) : ''));
+  }
   return res.json();
 }
 
@@ -326,7 +330,7 @@ async function saveSchedule() {
     setStatus('تم الحفظ ✓');
     localDirty = false;
   } catch (e) {
-    setStatus('حصل خطأ في الحفظ، تأكد من اتصال الإنترنت', true);
+    setStatus('خطأ في الحفظ: ' + (e && e.message ? e.message : 'unknown'), true);
   }
 }
 
