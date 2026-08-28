@@ -258,4 +258,345 @@
   </div>
   <div class="field">
     <label>السنة</label>
-    <input id="yearIn
+    <input id="yearInput" type="number" min="2020" max="2100">
+  </div>
+</div>
+
+<div class="linkbox">
+  ده لينك القسم ده تحديدًا. ابعتيه لزمايلك في نفس القسم وهيشوفوا جدول القسم ده بس، مش أي قسم تاني:
+  <div id="deptLinkText" style="direction: ltr; margin-top:4px;"></div>
+  <button onclick="copyDeptLink()">نسخ اللينك</button>
+</div>
+
+<div class="status" id="statusMsg">جاري التحميل...</div>
+
+<div class="legend">
+  اكتب في كل خانة: <span class="l1">صبح</span><span class="l2">نوبتجية</span><span class="l3">سهر</span><span class="l4">عطلة</span>
+</div>
+
+<div class="table-wrap">
+<table id="scheduleTable">
+  <thead>
+    <tr id="headerRow">
+      <th class="namecol">الاسم</th>
+    </tr>
+  </thead>
+  <tbody id="tableBody"></tbody>
+</table>
+</div>
+
+<button class="addrow" onclick="addRow('', null, true)">+ إضافة اسم جديد</button>
+
+<div class="sharenote">كل قسم له جدوله الخاص، وكل شهر منفصل عن اللي قبله. التعديل هنا مايأثرش على أي قسم أو شهر تاني.</div>
+
+</div>
+
+<script>
+/* =========================================================
+   حطي هنا كود Firebase بتاعك (هنجيب ده مع بعض خطوة بخطوة):
+   ========================================================= */
+const firebaseConfig = {
+  apiKey: "AIzaSyAmiKyuuNo_Dyy7tXtRk_LoczGq9PccKLI",
+  authDomain: "hospital-schedule-29cef.firebaseapp.com",
+  projectId: "hospital-schedule-29cef",
+  storageBucket: "hospital-schedule-29cef.firebasestorage.app",
+  messagingSenderId: "829370341763",
+  appId: "1:829370341763:web:af65f651b7ec24b41f7eb6"
+};
+/* ========================================================= */
+
+const monthNames = ["يناير","فبراير","مارس","أبريل","مايو","يونيو","يوليو","أغسطس","سبتمبر","أكتوبر","نوفمبر","ديسمبر"];
+const dayNames = ["الأحد","الاثنين","الثلاثاء","الأربعاء","الخميس","الجمعة","السبت"];
+
+const monthSelect = document.getElementById('monthSelect');
+const yearInput = document.getElementById('yearInput');
+const hospitalInput = document.getElementById('hospitalInput');
+const deptInput = document.getElementById('deptInput');
+const statusMsg = document.getElementById('statusMsg');
+const headerRow = document.getElementById('headerRow');
+const tableBody = document.getElementById('tableBody');
+const deptLabel = document.getElementById('deptLabel');
+const deptLinkText = document.getElementById('deptLinkText');
+let setStatusGlobal = () => {};
+
+if (typeof firebaseConfig === "string") {
+  document.getElementById('setupBox').style.display = 'block';
+  document.getElementById('appRoot').style.display = 'none';
+} else {
+  document.getElementById('setupBox').style.display = 'none';
+  document.getElementById('appRoot').style.display = 'block';
+  if (typeof firebase === "undefined") {
+    document.getElementById('statusMsg').textContent = 'تعذر تحميل مكتبة Firebase (مشكلة في الشبكة/الاتصال). جرّبي تحديث الصفحة أو شبكة إنترنت تانية.';
+    document.getElementById('statusMsg').className = 'status error';
+  } else {
+    try {
+      runApp();
+    } catch (e) {
+      document.getElementById('statusMsg').textContent = 'حصل خطأ أثناء تشغيل التطبيق: ' + e.message;
+      document.getElementById('statusMsg').className = 'status error';
+    }
+  }
+}
+
+function sanitizeDeptId(name) {
+  const trimmed = (name || '').trim();
+  if (!trimmed) return 'قسم-عام';
+  return trimmed.replace(/[\/\.\#\$\[\]]/g, '-').slice(0, 80);
+}
+
+function copyDeptLink() {
+  const text = deptLinkText.textContent;
+  navigator.clipboard.writeText(text).then(() => {
+    setStatusGlobal('تم نسخ اللينك ✓');
+  }).catch(() => {});
+}
+
+function runApp() {
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.firestore();
+
+  const urlParams = new URLSearchParams(window.location.search);
+  let deptName = urlParams.get('dept') || '';
+  let deptId = sanitizeDeptId(deptName);
+  deptInput.value = deptName;
+
+  monthNames.forEach((name, idx) => {
+    const opt = document.createElement('option');
+    opt.value = idx + 1;
+    opt.textContent = name;
+    monthSelect.appendChild(opt);
+  });
+
+  const now = new Date();
+  let currentYear = now.getFullYear();
+  let currentMonth = now.getMonth() + 1;
+  let dataUnsub = null;
+  let metaUnsub = null;
+  let ignoreNextSnapshot = false;
+  let localDirty = false;
+
+  function setStatus(text, isError) {
+    statusMsg.textContent = text;
+    statusMsg.className = 'status' + (isError ? ' error' : '');
+  }
+  setStatusGlobal = setStatus;
+
+  function updateDeptLinkUI() {
+    deptLabel.textContent = deptName ? ('صفحة قسم: ' + deptName) : 'صفحة قسم عام (لسه ما اتسمّاش)';
+    const url = new URL(window.location.href);
+    url.searchParams.set('dept', deptName || 'عام');
+    deptLinkText.textContent = url.toString();
+  }
+
+  function metaRef() {
+    return db.collection('departments').doc(deptId);
+  }
+  function dataDocId(year, month) {
+    return 'data-' + year + '-' + String(month).padStart(2, '0');
+  }
+  function dataRef(year, month) {
+    return db.collection('departments').doc(deptId).collection('months').doc(dataDocId(year, month));
+  }
+
+  function buildHeader(year, month) {
+    headerRow.innerHTML = '<th class="namecol">الاسم</th>';
+    const daysInMonth = new Date(year, month, 0).getDate();
+    for (let d = 1; d <= daysInMonth; d++) {
+      const date = new Date(year, month - 1, d);
+      const th = document.createElement('th');
+      th.innerHTML = '<span class="dnum">' + d + '</span><span class="dname">' + dayNames[date.getDay()] + '</span>';
+      headerRow.appendChild(th);
+    }
+    return daysInMonth;
+  }
+
+  function addRow(name, cells, focusName) {
+    const daysInMonth = new Date(currentYear, currentMonth, 0).getDate();
+    const tr = document.createElement('tr');
+
+    const nameTd = document.createElement('td');
+    nameTd.className = 'namecol';
+    nameTd.contentEditable = 'true';
+    nameTd.textContent = name || '';
+    nameTd.addEventListener('input', scheduleSave);
+    tr.appendChild(nameTd);
+
+    for (let d = 0; d < daysInMonth; d++) {
+      const td = document.createElement('td');
+      td.className = 'cell';
+      td.contentEditable = 'true';
+      td.textContent = (cells && cells[d]) ? cells[d] : '';
+      td.addEventListener('input', scheduleSave);
+      tr.appendChild(td);
+    }
+
+    const delTd = document.createElement('td');
+    delTd.style.border = 'none';
+    const delBtn = document.createElement('button');
+    delBtn.className = 'delbtn';
+    delBtn.textContent = 'حذف';
+    delBtn.onclick = () => { tr.remove(); scheduleSave(); };
+    delTd.appendChild(delBtn);
+    tr.appendChild(delTd);
+
+    tableBody.appendChild(tr);
+    if (focusName) nameTd.focus();
+  }
+  window.addRow = addRow;
+
+  function collectRows() {
+    const rows = [];
+    tableBody.querySelectorAll('tr').forEach(tr => {
+      const tds = tr.querySelectorAll('td.cell');
+      const nameTd = tr.querySelector('td.namecol');
+      const cells = [];
+      tds.forEach(td => cells.push(td.textContent));
+      rows.push({ name: nameTd.textContent, cells: cells });
+    });
+    return rows;
+  }
+
+  let saveTimer = null;
+  function scheduleSave() {
+    localDirty = true;
+    clearTimeout(saveTimer);
+    setStatus('جاري الحفظ...');
+    saveTimer = setTimeout(saveSchedule, 700);
+  }
+
+  async function saveSchedule() {
+    try {
+      const rows = collectRows();
+      ignoreNextSnapshot = true;
+      await dataRef(currentYear, currentMonth).set({ rows: rows });
+      setStatus('تم الحفظ ✓');
+      localDirty = false;
+    } catch (e) {
+      setStatus('حصل خطأ في الحفظ، تأكدي من اتصال الإنترنت', true);
+    }
+  }
+
+  async function saveMeta() {
+    try {
+      await metaRef().set({
+        hospital: hospitalInput.value,
+        department: deptName,
+        currentYear: currentYear,
+        currentMonth: currentMonth
+      }, { merge: true });
+    } catch (e) {
+      // not critical
+    }
+  }
+
+  function renderRowsFromData(rows) {
+    tableBody.innerHTML = '';
+    if (rows && rows.length) {
+      rows.forEach(r => addRow(r.name, r.cells, false));
+    } else {
+      addRow('', null, false);
+    }
+  }
+
+  function listenToMonth(year, month) {
+    if (dataUnsub) dataUnsub();
+    buildHeader(year, month);
+    tableBody.innerHTML = '';
+    setStatus('جاري التحميل...');
+    let gotFirstSnapshot = false;
+    const stuckTimer = setTimeout(() => {
+      if (!gotFirstSnapshot) {
+        setStatus('تعذر الاتصال بقاعدة البيانات (مشكلة في الشبكة). الجدول شغال بدون مزامنة مؤقتًا.', true);
+        if (tableBody.children.length === 0) addRow('', null, false);
+      }
+    }, 8000);
+    dataUnsub = dataRef(year, month).onSnapshot(snap => {
+      gotFirstSnapshot = true;
+      clearTimeout(stuckTimer);
+      if (ignoreNextSnapshot) { ignoreNextSnapshot = false; setStatus(''); return; }
+      if (isEditingNow() || localDirty) return;
+      const data = snap.exists ? snap.data() : null;
+      renderRowsFromData(data ? data.rows : null);
+      setStatus('');
+    }, err => {
+      clearTimeout(stuckTimer);
+      setStatus('في مشكلة في الاتصال بقاعدة البيانات', true);
+    });
+  }
+
+  function isEditingNow() {
+    const active = document.activeElement;
+    if (!active) return false;
+    return active.isContentEditable || active === hospitalInput || active === deptInput || active === yearInput;
+  }
+
+  async function switchMonth(year, month) {
+    currentYear = year;
+    currentMonth = month;
+    monthSelect.value = month;
+    yearInput.value = year;
+    listenToMonth(year, month);
+    saveMeta();
+  }
+
+  function switchDepartment(newName) {
+    deptName = newName;
+    deptId = sanitizeDeptId(newName);
+    updateDeptLinkUI();
+    const url = new URL(window.location.href);
+    url.searchParams.set('dept', newName || 'عام');
+    window.history.replaceState({}, '', url.toString());
+    listenToMeta();
+    listenToMonth(currentYear, currentMonth);
+  }
+
+  function listenToMeta() {
+    if (metaUnsub) metaUnsub();
+    metaUnsub = metaRef().onSnapshot(snap => {
+      if (!snap.exists) return;
+      const meta = snap.data();
+      if (document.activeElement !== hospitalInput && hospitalInput.value !== (meta.hospital || '')) {
+        hospitalInput.value = meta.hospital || '';
+      }
+      if ((meta.currentYear && meta.currentYear !== currentYear) || (meta.currentMonth && meta.currentMonth !== currentMonth)) {
+        if (!isEditingNow()) {
+          currentYear = meta.currentYear;
+          currentMonth = meta.currentMonth;
+          monthSelect.value = currentMonth;
+          yearInput.value = currentYear;
+          listenToMonth(currentYear, currentMonth);
+        }
+      }
+    }, err => {
+      setStatus('في مشكلة في الاتصال بقاعدة البيانات', true);
+    });
+  }
+
+  monthSelect.addEventListener('change', () => {
+    switchMonth(currentYear, parseInt(monthSelect.value, 10));
+  });
+  yearInput.addEventListener('change', () => {
+    const y = parseInt(yearInput.value, 10);
+    if (y >= 2020 && y <= 2100) switchMonth(y, currentMonth);
+  });
+  hospitalInput.addEventListener('input', () => { clearTimeout(saveTimer); saveTimer = setTimeout(saveMeta, 700); });
+
+  let deptDebounce = null;
+  deptInput.addEventListener('input', () => {
+    clearTimeout(deptDebounce);
+    deptDebounce = setTimeout(() => {
+      switchDepartment(deptInput.value.trim());
+      saveMeta();
+    }, 800);
+  });
+
+  monthSelect.value = currentMonth;
+  yearInput.value = currentYear;
+  updateDeptLinkUI();
+  listenToMeta();
+  listenToMonth(currentYear, currentMonth);
+}
+</script>
+
+</body>
+</html>
