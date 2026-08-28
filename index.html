@@ -5,9 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>جدول النوبتجية</title>
 
-<script src="https://cdn.jsdelivr.net/npm/firebase@10.12.2/firebase-app-compat.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/firebase@10.12.2/firebase-firestore-compat.js"></script>
-
 <style>
   * { box-sizing: border-box; }
   body {
@@ -17,214 +14,57 @@
     padding: 14px 10px 40px;
     direction: rtl;
   }
-  h1 {
-    text-align: center;
-    color: #1f2d3d;
-    font-size: 20px;
-    margin: 4px 0 4px;
-  }
-  .subtitle {
-    text-align: center;
-    color: #5a6b7b;
-    font-size: 12px;
-    margin-bottom: 14px;
-  }
-
+  h1 { text-align: center; color: #1f2d3d; font-size: 20px; margin: 4px 0 4px; }
+  .subtitle { text-align: center; color: #5a6b7b; font-size: 12px; margin-bottom: 14px; }
   .topbar {
-    background: white;
-    border-radius: 10px;
-    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
-    padding: 12px;
-    margin-bottom: 12px;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-    align-items: center;
-    justify-content: center;
+    background: white; border-radius: 10px; box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+    padding: 12px; margin-bottom: 12px; display: flex; flex-wrap: wrap; gap: 10px;
+    align-items: center; justify-content: center;
   }
-  .field {
-    display: flex;
-    flex-direction: column;
-    gap: 3px;
-    min-width: 130px;
-  }
-  .field label {
-    font-size: 11px;
-    color: #5a6b7b;
-  }
+  .field { display: flex; flex-direction: column; gap: 3px; min-width: 130px; }
+  .field label { font-size: 11px; color: #5a6b7b; }
   .field input, .field select {
-    border: 1px solid #d3dae1;
-    border-radius: 6px;
-    padding: 7px 8px;
-    font-size: 13px;
-    font-family: inherit;
-    background: #fbfcfd;
+    border: 1px solid #d3dae1; border-radius: 6px; padding: 7px 8px; font-size: 13px;
+    font-family: inherit; background: #fbfcfd;
   }
-  .field input:focus, .field select:focus {
-    outline: none;
-    border-color: #2c5364;
-    background: #fff;
-  }
-
+  .field input:focus, .field select:focus { outline: none; border-color: #2c5364; background: #fff; }
   .linkbox {
-    max-width: 900px;
-    margin: 0 auto 12px;
-    background: #eef6ee;
-    border: 1px solid #cfe8cf;
-    border-radius: 8px;
-    padding: 10px 12px;
-    font-size: 12px;
-    color: #2f5d33;
-    text-align: center;
+    max-width: 900px; margin: 0 auto 12px; background: #eef6ee; border: 1px solid #cfe8cf;
+    border-radius: 8px; padding: 10px 12px; font-size: 12px; color: #2f5d33; text-align: center;
     word-break: break-all;
   }
   .linkbox button {
-    margin-top: 6px;
-    background: #2c5364;
-    color: white;
-    border: none;
-    padding: 5px 12px;
-    border-radius: 5px;
-    font-size: 12px;
-    cursor: pointer;
+    margin-top: 6px; background: #2c5364; color: white; border: none; padding: 5px 12px;
+    border-radius: 5px; font-size: 12px; cursor: pointer;
   }
-
-  .status {
-    text-align: center;
-    font-size: 11px;
-    color: #8a97a3;
-    margin-bottom: 8px;
-    min-height: 14px;
-  }
+  .status { text-align: center; font-size: 11px; color: #8a97a3; margin-bottom: 8px; min-height: 14px; }
   .status.error { color: #c0392b; font-weight: bold; }
-
-  .legend {
-    text-align: center;
-    color: #5a6b7b;
-    font-size: 12px;
-    margin-bottom: 12px;
-  }
-  .legend span {
-    display: inline-block;
-    margin: 2px 4px;
-    padding: 2px 8px;
-    border-radius: 6px;
-  }
-  .l1 { background: #d7f0dd; }
-  .l2 { background: #dbe8fb; }
-  .l3 { background: #fde3d2; }
-  .l4 { background: #f1d9f7; }
-
-  .table-wrap {
-    overflow-x: auto;
-    background: white;
-    border-radius: 8px;
-    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
-  }
-  table {
-    border-collapse: collapse;
-    min-width: 1400px;
-  }
-  th, td {
-    border: 1px solid #e2e6ea;
-    text-align: center;
-    padding: 2px;
-  }
-  th.namecol, td.namecol {
-    position: sticky;
-    right: 0;
-    min-width: 110px;
-    font-size: 13px;
-  }
-  th.namecol {
-    background: #2c5364;
-    color: white;
-    z-index: 2;
-  }
-  td.namecol {
-    background: #eef3f7;
-    color: #1f2d3d;
-    z-index: 1;
-  }
-  th {
-    background: #2c5364;
-    color: white;
-    font-size: 11px;
-    padding: 4px 2px;
-    min-width: 46px;
-  }
+  .legend { text-align: center; color: #5a6b7b; font-size: 12px; margin-bottom: 12px; }
+  .legend span { display: inline-block; margin: 2px 4px; padding: 2px 8px; border-radius: 6px; }
+  .l1 { background: #d7f0dd; } .l2 { background: #dbe8fb; } .l3 { background: #fde3d2; } .l4 { background: #f1d9f7; }
+  .table-wrap { overflow-x: auto; background: white; border-radius: 8px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
+  table { border-collapse: collapse; min-width: 1400px; }
+  th, td { border: 1px solid #e2e6ea; text-align: center; padding: 2px; }
+  th.namecol, td.namecol { position: sticky; right: 0; min-width: 110px; font-size: 13px; }
+  th.namecol { background: #2c5364; color: white; z-index: 2; }
+  td.namecol { background: #eef3f7; color: #1f2d3d; z-index: 1; }
+  th { background: #2c5364; color: white; font-size: 11px; padding: 4px 2px; min-width: 46px; }
   th .dnum { font-size: 13px; display:block; }
   th .dname { font-size: 10px; font-weight: normal; opacity: 0.85; }
-
-  td.cell {
-    min-width: 46px;
-    height: 40px;
-    padding: 0;
-  }
-  td.cell[contenteditable="true"] {
-    outline: none;
-    font-size: 12px;
-  }
-  td.cell:focus {
-    background: #fff8dc;
-  }
-  td.namecol[contenteditable="true"] {
-    outline: none;
-    text-align: center;
-    padding-right: 4px;
-  }
-
+  td.cell { min-width: 46px; height: 40px; padding: 0; }
+  td.cell[contenteditable="true"] { outline: none; font-size: 12px; }
+  td.cell:focus { background: #fff8dc; }
+  td.namecol[contenteditable="true"] { outline: none; text-align: center; padding-right: 4px; }
   .delbtn {
-    background: #e57373;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    font-size: 10px;
-    padding: 2px 6px;
-    cursor: pointer;
-    margin-top: 2px;
+    background: #e57373; color: white; border: none; border-radius: 4px; font-size: 10px;
+    padding: 2px 6px; cursor: pointer; margin-top: 2px;
   }
-
   .addrow {
-    display: block;
-    margin: 12px auto 0;
-    background: #2c5364;
-    color: white;
-    border: none;
-    padding: 8px 18px;
-    border-radius: 6px;
-    font-size: 14px;
-    cursor: pointer;
+    display: block; margin: 12px auto 0; background: #2c5364; color: white; border: none;
+    padding: 8px 18px; border-radius: 6px; font-size: 14px; cursor: pointer;
   }
   .addrow:active { opacity: 0.8; }
-
-  .sharenote {
-    text-align: center;
-    font-size: 11px;
-    color: #8a97a3;
-    margin-top: 14px;
-  }
-
-  .setupBox {
-    max-width: 640px;
-    margin: 40px auto;
-    background: white;
-    border-radius: 10px;
-    padding: 20px;
-    box-shadow: 0 1px 6px rgba(0,0,0,0.1);
-    line-height: 1.8;
-    font-size: 14px;
-    color: #1f2d3d;
-  }
-  .setupBox h2 { font-size: 17px; }
-  .setupBox code {
-    background: #f1f3f5;
-    padding: 1px 5px;
-    border-radius: 4px;
-    direction: ltr;
-    display: inline-block;
-  }
-
+  .sharenote { text-align: center; font-size: 11px; color: #8a97a3; margin-top: 14px; }
   @media print {
     body { background: white; padding: 0; }
     .legend, .addrow, .topbar, .status, .sharenote, .delbtn, .linkbox { display: none; }
@@ -232,13 +72,6 @@
 </style>
 </head>
 <body>
-
-<div id="setupBox" class="setupBox" style="display:none;">
-  <h2>خطوة أخيرة قبل الاستخدام</h2>
-  <p>الصفحة دي محتاجة "مفتاح" Firebase مجاني عشان المزامنة تشتغل من برة. هنعملها مع بعض خطوة خطوة.</p>
-</div>
-
-<div id="appRoot" style="display:none;">
 
 <h1>جدول النوبتجية</h1>
 <div class="subtitle" id="deptLabel"></div>
@@ -277,9 +110,7 @@
 <div class="table-wrap">
 <table id="scheduleTable">
   <thead>
-    <tr id="headerRow">
-      <th class="namecol">الاسم</th>
-    </tr>
+    <tr id="headerRow"><th class="namecol">الاسم</th></tr>
   </thead>
   <tbody id="tableBody"></tbody>
 </table>
@@ -289,21 +120,9 @@
 
 <div class="sharenote">كل قسم له جدوله الخاص، وكل شهر منفصل عن اللي قبله. التعديل هنا مايأثرش على أي قسم أو شهر تاني.</div>
 
-</div>
-
 <script>
-/* =========================================================
-   حطي هنا كود Firebase بتاعك (هنجيب ده مع بعض خطوة بخطوة):
-   ========================================================= */
-const firebaseConfig = {
-  apiKey: "AIzaSyAmiKyuuNo_Dyy7tXtRk_LoczGq9PccKLI",
-  authDomain: "hospital-schedule-29cef.firebaseapp.com",
-  projectId: "hospital-schedule-29cef",
-  storageBucket: "hospital-schedule-29cef.firebasestorage.app",
-  messagingSenderId: "829370341763",
-  appId: "1:829370341763:web:af65f651b7ec24b41f7eb6"
-};
-/* ========================================================= */
+const PROJECT_ID = "hospital-schedule-29cef";
+const BASE_URL = "https://firestore.googleapis.com/v1/projects/" + PROJECT_ID + "/databases/(default)/documents";
 
 const monthNames = ["يناير","فبراير","مارس","أبريل","مايو","يونيو","يوليو","أغسطس","سبتمبر","أكتوبر","نوفمبر","ديسمبر"];
 const dayNames = ["الأحد","الاثنين","الثلاثاء","الأربعاء","الخميس","الجمعة","السبت"];
@@ -317,25 +136,70 @@ const headerRow = document.getElementById('headerRow');
 const tableBody = document.getElementById('tableBody');
 const deptLabel = document.getElementById('deptLabel');
 const deptLinkText = document.getElementById('deptLinkText');
-let setStatusGlobal = () => {};
 
-if (typeof firebaseConfig === "string") {
-  document.getElementById('setupBox').style.display = 'block';
-  document.getElementById('appRoot').style.display = 'none';
-} else {
-  document.getElementById('setupBox').style.display = 'none';
-  document.getElementById('appRoot').style.display = 'block';
-  if (typeof firebase === "undefined") {
-    document.getElementById('statusMsg').textContent = 'تعذر تحميل مكتبة Firebase (مشكلة في الشبكة/الاتصال). جرّبي تحديث الصفحة أو شبكة إنترنت تانية.';
-    document.getElementById('statusMsg').className = 'status error';
-  } else {
-    try {
-      runApp();
-    } catch (e) {
-      document.getElementById('statusMsg').textContent = 'حصل خطأ أثناء تشغيل التطبيق: ' + e.message;
-      document.getElementById('statusMsg').className = 'status error';
-    }
+function encodeValue(v) {
+  if (v === null || v === undefined) return { nullValue: null };
+  if (typeof v === 'string') return { stringValue: v };
+  if (typeof v === 'number') return Number.isInteger(v) ? { integerValue: String(v) } : { doubleValue: v };
+  if (typeof v === 'boolean') return { booleanValue: v };
+  if (Array.isArray(v)) return { arrayValue: { values: v.map(encodeValue) } };
+  if (typeof v === 'object') {
+    const fields = {};
+    for (const k in v) fields[k] = encodeValue(v[k]);
+    return { mapValue: { fields: fields } };
   }
+  return { nullValue: null };
+}
+function decodeValue(fv) {
+  if (!fv) return null;
+  if ('stringValue' in fv) return fv.stringValue;
+  if ('integerValue' in fv) return parseInt(fv.integerValue, 10);
+  if ('doubleValue' in fv) return fv.doubleValue;
+  if ('booleanValue' in fv) return fv.booleanValue;
+  if ('nullValue' in fv) return null;
+  if ('arrayValue' in fv) return (fv.arrayValue.values || []).map(decodeValue);
+  if ('mapValue' in fv) {
+    const obj = {};
+    const fields = fv.mapValue.fields || {};
+    for (const k in fields) obj[k] = decodeValue(fields[k]);
+    return obj;
+  }
+  return null;
+}
+function encodeDoc(obj) {
+  const fields = {};
+  for (const k in obj) fields[k] = encodeValue(obj[k]);
+  return { fields: fields };
+}
+function decodeDoc(doc) {
+  if (!doc || !doc.fields) return null;
+  const obj = {};
+  for (const k in doc.fields) obj[k] = decodeValue(doc.fields[k]);
+  return obj;
+}
+
+async function getDoc(path) {
+  const res = await fetch(BASE_URL + '/' + path);
+  if (res.status === 404) return null;
+  if (!res.ok) throw new Error('HTTP ' + res.status);
+  const json = await res.json();
+  return decodeDoc(json);
+}
+async function setDoc(path, obj) {
+  const encoded = encodeDoc(obj);
+  const params = Object.keys(encoded.fields).map(k => 'updateMask.fieldPaths=' + encodeURIComponent(k)).join('&');
+  const res = await fetch(BASE_URL + '/' + path + '?' + params, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(encoded)
+  });
+  if (!res.ok) throw new Error('HTTP ' + res.status);
+  return res.json();
+}
+
+function setStatus(text, isError) {
+  statusMsg.textContent = text;
+  statusMsg.className = 'status' + (isError ? ' error' : '');
 }
 
 function sanitizeDeptId(name) {
@@ -347,255 +211,246 @@ function sanitizeDeptId(name) {
 function copyDeptLink() {
   const text = deptLinkText.textContent;
   navigator.clipboard.writeText(text).then(() => {
-    setStatusGlobal('تم نسخ اللينك ✓');
+    setStatus('تم نسخ اللينك ✓');
   }).catch(() => {});
 }
 
-function runApp() {
-  firebase.initializeApp(firebaseConfig);
-  const db = firebase.firestore();
+const urlParams = new URLSearchParams(window.location.search);
+let deptName = urlParams.get('dept') || '';
+let deptId = sanitizeDeptId(deptName);
+deptInput.value = deptName;
 
-  const urlParams = new URLSearchParams(window.location.search);
-  let deptName = urlParams.get('dept') || '';
-  let deptId = sanitizeDeptId(deptName);
-  deptInput.value = deptName;
+monthNames.forEach((name, idx) => {
+  const opt = document.createElement('option');
+  opt.value = idx + 1;
+  opt.textContent = name;
+  monthSelect.appendChild(opt);
+});
 
-  monthNames.forEach((name, idx) => {
-    const opt = document.createElement('option');
-    opt.value = idx + 1;
-    opt.textContent = name;
-    monthSelect.appendChild(opt);
+const now = new Date();
+let currentYear = now.getFullYear();
+let currentMonth = now.getMonth() + 1;
+let localDirty = false;
+let pollTimer = null;
+
+function metaPath() { return 'departments/' + encodeURIComponent(deptId); }
+function dataDocId(year, month) { return 'data-' + year + '-' + String(month).padStart(2, '0'); }
+function dataPath(year, month) { return 'departments/' + encodeURIComponent(deptId) + '/months/' + dataDocId(year, month); }
+
+function updateDeptLinkUI() {
+  deptLabel.textContent = deptName ? ('صفحة قسم: ' + deptName) : 'صفحة قسم عام (لسه ما اتسمّاش)';
+  const url = new URL(window.location.href);
+  url.searchParams.set('dept', deptName || 'عام');
+  deptLinkText.textContent = url.toString();
+}
+
+function buildHeader(year, month) {
+  headerRow.innerHTML = '<th class="namecol">الاسم</th>';
+  const daysInMonth = new Date(year, month, 0).getDate();
+  for (let d = 1; d <= daysInMonth; d++) {
+    const date = new Date(year, month - 1, d);
+    const th = document.createElement('th');
+    th.innerHTML = '<span class="dnum">' + d + '</span><span class="dname">' + dayNames[date.getDay()] + '</span>';
+    headerRow.appendChild(th);
+  }
+  return daysInMonth;
+}
+
+function addRow(name, cells, focusName) {
+  const daysInMonth = new Date(currentYear, currentMonth, 0).getDate();
+  const tr = document.createElement('tr');
+
+  const nameTd = document.createElement('td');
+  nameTd.className = 'namecol';
+  nameTd.contentEditable = 'true';
+  nameTd.textContent = name || '';
+  nameTd.addEventListener('input', scheduleSave);
+  tr.appendChild(nameTd);
+
+  for (let d = 0; d < daysInMonth; d++) {
+    const td = document.createElement('td');
+    td.className = 'cell';
+    td.contentEditable = 'true';
+    td.textContent = (cells && cells[d]) ? cells[d] : '';
+    td.addEventListener('input', scheduleSave);
+    tr.appendChild(td);
+  }
+
+  const delTd = document.createElement('td');
+  delTd.style.border = 'none';
+  const delBtn = document.createElement('button');
+  delBtn.className = 'delbtn';
+  delBtn.textContent = 'حذف';
+  delBtn.onclick = () => { tr.remove(); scheduleSave(); };
+  delTd.appendChild(delBtn);
+  tr.appendChild(delTd);
+
+  tableBody.appendChild(tr);
+  if (focusName) nameTd.focus();
+}
+window.addRow = addRow;
+
+function collectRows() {
+  const rows = [];
+  tableBody.querySelectorAll('tr').forEach(tr => {
+    const tds = tr.querySelectorAll('td.cell');
+    const nameTd = tr.querySelector('td.namecol');
+    const cells = [];
+    tds.forEach(td => cells.push(td.textContent));
+    rows.push({ name: nameTd.textContent, cells: cells });
   });
+  return rows;
+}
 
-  const now = new Date();
-  let currentYear = now.getFullYear();
-  let currentMonth = now.getMonth() + 1;
-  let dataUnsub = null;
-  let metaUnsub = null;
-  let ignoreNextSnapshot = false;
-  let localDirty = false;
+let saveTimer = null;
+function scheduleSave() {
+  localDirty = true;
+  clearTimeout(saveTimer);
+  setStatus('جاري الحفظ...');
+  saveTimer = setTimeout(saveSchedule, 700);
+}
 
-  function setStatus(text, isError) {
-    statusMsg.textContent = text;
-    statusMsg.className = 'status' + (isError ? ' error' : '');
+async function saveSchedule() {
+  try {
+    const rows = collectRows();
+    await setDoc(dataPath(currentYear, currentMonth), { rows: rows });
+    setStatus('تم الحفظ ✓');
+    localDirty = false;
+  } catch (e) {
+    setStatus('حصل خطأ في الحفظ، تأكد من اتصال الإنترنت', true);
   }
-  setStatusGlobal = setStatus;
+}
 
-  function updateDeptLinkUI() {
-    deptLabel.textContent = deptName ? ('صفحة قسم: ' + deptName) : 'صفحة قسم عام (لسه ما اتسمّاش)';
-    const url = new URL(window.location.href);
-    url.searchParams.set('dept', deptName || 'عام');
-    deptLinkText.textContent = url.toString();
-  }
-
-  function metaRef() {
-    return db.collection('departments').doc(deptId);
-  }
-  function dataDocId(year, month) {
-    return 'data-' + year + '-' + String(month).padStart(2, '0');
-  }
-  function dataRef(year, month) {
-    return db.collection('departments').doc(deptId).collection('months').doc(dataDocId(year, month));
-  }
-
-  function buildHeader(year, month) {
-    headerRow.innerHTML = '<th class="namecol">الاسم</th>';
-    const daysInMonth = new Date(year, month, 0).getDate();
-    for (let d = 1; d <= daysInMonth; d++) {
-      const date = new Date(year, month - 1, d);
-      const th = document.createElement('th');
-      th.innerHTML = '<span class="dnum">' + d + '</span><span class="dname">' + dayNames[date.getDay()] + '</span>';
-      headerRow.appendChild(th);
-    }
-    return daysInMonth;
-  }
-
-  function addRow(name, cells, focusName) {
-    const daysInMonth = new Date(currentYear, currentMonth, 0).getDate();
-    const tr = document.createElement('tr');
-
-    const nameTd = document.createElement('td');
-    nameTd.className = 'namecol';
-    nameTd.contentEditable = 'true';
-    nameTd.textContent = name || '';
-    nameTd.addEventListener('input', scheduleSave);
-    tr.appendChild(nameTd);
-
-    for (let d = 0; d < daysInMonth; d++) {
-      const td = document.createElement('td');
-      td.className = 'cell';
-      td.contentEditable = 'true';
-      td.textContent = (cells && cells[d]) ? cells[d] : '';
-      td.addEventListener('input', scheduleSave);
-      tr.appendChild(td);
-    }
-
-    const delTd = document.createElement('td');
-    delTd.style.border = 'none';
-    const delBtn = document.createElement('button');
-    delBtn.className = 'delbtn';
-    delBtn.textContent = 'حذف';
-    delBtn.onclick = () => { tr.remove(); scheduleSave(); };
-    delTd.appendChild(delBtn);
-    tr.appendChild(delTd);
-
-    tableBody.appendChild(tr);
-    if (focusName) nameTd.focus();
-  }
-  window.addRow = addRow;
-
-  function collectRows() {
-    const rows = [];
-    tableBody.querySelectorAll('tr').forEach(tr => {
-      const tds = tr.querySelectorAll('td.cell');
-      const nameTd = tr.querySelector('td.namecol');
-      const cells = [];
-      tds.forEach(td => cells.push(td.textContent));
-      rows.push({ name: nameTd.textContent, cells: cells });
+async function saveMeta() {
+  try {
+    await setDoc(metaPath(), {
+      hospital: hospitalInput.value,
+      department: deptName,
+      currentYear: currentYear,
+      currentMonth: currentMonth
     });
-    return rows;
+  } catch (e) {
+    // not critical
   }
+}
 
-  let saveTimer = null;
-  function scheduleSave() {
-    localDirty = true;
-    clearTimeout(saveTimer);
-    setStatus('جاري الحفظ...');
-    saveTimer = setTimeout(saveSchedule, 700);
+function renderRowsFromData(rows) {
+  tableBody.innerHTML = '';
+  if (rows && rows.length) {
+    rows.forEach(r => addRow(r.name, r.cells, false));
+  } else {
+    addRow('', null, false);
   }
+}
 
-  async function saveSchedule() {
-    try {
-      const rows = collectRows();
-      ignoreNextSnapshot = true;
-      await dataRef(currentYear, currentMonth).set({ rows: rows });
-      setStatus('تم الحفظ ✓');
-      localDirty = false;
-    } catch (e) {
-      setStatus('حصل خطأ في الحفظ، تأكدي من اتصال الإنترنت', true);
-    }
-  }
+function isEditingNow() {
+  const active = document.activeElement;
+  if (!active) return false;
+  return active.isContentEditable || active === hospitalInput || active === deptInput || active === yearInput;
+}
 
-  async function saveMeta() {
-    try {
-      await metaRef().set({
-        hospital: hospitalInput.value,
-        department: deptName,
-        currentYear: currentYear,
-        currentMonth: currentMonth
-      }, { merge: true });
-    } catch (e) {
-      // not critical
-    }
-  }
+let lastDataSnapshot = null;
 
-  function renderRowsFromData(rows) {
-    tableBody.innerHTML = '';
-    if (rows && rows.length) {
-      rows.forEach(r => addRow(r.name, r.cells, false));
-    } else {
-      addRow('', null, false);
-    }
-  }
-
-  function listenToMonth(year, month) {
-    if (dataUnsub) dataUnsub();
-    buildHeader(year, month);
+async function loadMonth(year, month, showLoading) {
+  buildHeader(year, month);
+  if (showLoading) {
     tableBody.innerHTML = '';
     setStatus('جاري التحميل...');
-    let gotFirstSnapshot = false;
-    const stuckTimer = setTimeout(() => {
-      if (!gotFirstSnapshot) {
-        setStatus('تعذر الاتصال بقاعدة البيانات (مشكلة في الشبكة). الجدول شغال بدون مزامنة مؤقتًا.', true);
-        if (tableBody.children.length === 0) addRow('', null, false);
+  }
+  try {
+    const data = await getDoc(dataPath(year, month));
+    const snapshot = JSON.stringify(data ? data.rows : null);
+    if (snapshot !== lastDataSnapshot) {
+      lastDataSnapshot = snapshot;
+      if (!isEditingNow() && !localDirty) {
+        renderRowsFromData(data ? data.rows : null);
       }
-    }, 8000);
-    dataUnsub = dataRef(year, month).onSnapshot(snap => {
-      gotFirstSnapshot = true;
-      clearTimeout(stuckTimer);
-      if (ignoreNextSnapshot) { ignoreNextSnapshot = false; setStatus(''); return; }
-      if (isEditingNow() || localDirty) return;
-      const data = snap.exists ? snap.data() : null;
-      renderRowsFromData(data ? data.rows : null);
-      setStatus('');
-    }, err => {
-      clearTimeout(stuckTimer);
-      setStatus('في مشكلة في الاتصال بقاعدة البيانات', true);
-    });
+    }
+    if (tableBody.children.length === 0) addRow('', null, false);
+    setStatus('');
+  } catch (e) {
+    setStatus('تعذر الاتصال بقاعدة البيانات. الجدول شغال محليًا بدون مزامنة.', true);
+    if (tableBody.children.length === 0) addRow('', null, false);
   }
+}
 
-  function isEditingNow() {
-    const active = document.activeElement;
-    if (!active) return false;
-    return active.isContentEditable || active === hospitalInput || active === deptInput || active === yearInput;
-  }
-
-  async function switchMonth(year, month) {
-    currentYear = year;
-    currentMonth = month;
-    monthSelect.value = month;
-    yearInput.value = year;
-    listenToMonth(year, month);
-    saveMeta();
-  }
-
-  function switchDepartment(newName) {
-    deptName = newName;
-    deptId = sanitizeDeptId(newName);
-    updateDeptLinkUI();
-    const url = new URL(window.location.href);
-    url.searchParams.set('dept', newName || 'عام');
-    window.history.replaceState({}, '', url.toString());
-    listenToMeta();
-    listenToMonth(currentYear, currentMonth);
-  }
-
-  function listenToMeta() {
-    if (metaUnsub) metaUnsub();
-    metaUnsub = metaRef().onSnapshot(snap => {
-      if (!snap.exists) return;
-      const meta = snap.data();
-      if (document.activeElement !== hospitalInput && hospitalInput.value !== (meta.hospital || '')) {
-        hospitalInput.value = meta.hospital || '';
-      }
-      if ((meta.currentYear && meta.currentYear !== currentYear) || (meta.currentMonth && meta.currentMonth !== currentMonth)) {
-        if (!isEditingNow()) {
+async function loadMeta() {
+  try {
+    const meta = await getDoc(metaPath());
+    if (meta) {
+      if (document.activeElement !== hospitalInput) hospitalInput.value = meta.hospital || '';
+      if (meta.currentYear && meta.currentMonth && !isEditingNow()) {
+        if (meta.currentYear !== currentYear || meta.currentMonth !== currentMonth) {
           currentYear = meta.currentYear;
           currentMonth = meta.currentMonth;
           monthSelect.value = currentMonth;
           yearInput.value = currentYear;
-          listenToMonth(currentYear, currentMonth);
+          lastDataSnapshot = null;
+          await loadMonth(currentYear, currentMonth, true);
         }
       }
-    }, err => {
-      setStatus('في مشكلة في الاتصال بقاعدة البيانات', true);
-    });
+    }
+  } catch (e) {
+    // ignore transient errors
   }
+}
 
-  monthSelect.addEventListener('change', () => {
-    switchMonth(currentYear, parseInt(monthSelect.value, 10));
-  });
-  yearInput.addEventListener('change', () => {
-    const y = parseInt(yearInput.value, 10);
-    if (y >= 2020 && y <= 2100) switchMonth(y, currentMonth);
-  });
-  hospitalInput.addEventListener('input', () => { clearTimeout(saveTimer); saveTimer = setTimeout(saveMeta, 700); });
+async function switchMonth(year, month) {
+  currentYear = year;
+  currentMonth = month;
+  monthSelect.value = month;
+  yearInput.value = year;
+  lastDataSnapshot = null;
+  await loadMonth(year, month, true);
+  saveMeta();
+}
 
-  let deptDebounce = null;
-  deptInput.addEventListener('input', () => {
-    clearTimeout(deptDebounce);
-    deptDebounce = setTimeout(() => {
-      switchDepartment(deptInput.value.trim());
-      saveMeta();
-    }, 800);
-  });
+async function switchDepartment(newName) {
+  deptName = newName;
+  deptId = sanitizeDeptId(newName);
+  updateDeptLinkUI();
+  const url = new URL(window.location.href);
+  url.searchParams.set('dept', newName || 'عام');
+  window.history.replaceState({}, '', url.toString());
+  lastDataSnapshot = null;
+  await loadMonth(currentYear, currentMonth, true);
+  await loadMeta();
+}
 
+monthSelect.addEventListener('change', () => {
+  switchMonth(currentYear, parseInt(monthSelect.value, 10));
+});
+yearInput.addEventListener('change', () => {
+  const y = parseInt(yearInput.value, 10);
+  if (y >= 2020 && y <= 2100) switchMonth(y, currentMonth);
+});
+hospitalInput.addEventListener('input', () => { clearTimeout(saveTimer); saveTimer = setTimeout(saveMeta, 700); });
+
+let deptDebounce = null;
+deptInput.addEventListener('input', () => {
+  clearTimeout(deptDebounce);
+  deptDebounce = setTimeout(() => {
+    switchDepartment(deptInput.value.trim());
+    saveMeta();
+  }, 800);
+});
+
+async function init() {
   monthSelect.value = currentMonth;
   yearInput.value = currentYear;
   updateDeptLinkUI();
-  listenToMeta();
-  listenToMonth(currentYear, currentMonth);
+  await loadMeta();
+  monthSelect.value = currentMonth;
+  yearInput.value = currentYear;
+  await loadMonth(currentYear, currentMonth, true);
+  pollTimer = setInterval(async () => {
+    if (isEditingNow() || localDirty) return;
+    await loadMeta();
+    await loadMonth(currentYear, currentMonth, false);
+  }, 4000);
 }
+
+init();
 </script>
 
 </body>
