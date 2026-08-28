@@ -187,11 +187,20 @@ async function getDoc(path) {
 }
 async function setDoc(path, obj) {
   const encoded = encodeDoc(obj);
-  const params = Object.keys(encoded.fields).map(k => 'updateMask.fieldPaths=' + encodeURIComponent(k)).join('&');
-  const res = await fetch(BASE_URL + '/' + path + '?' + params, {
-    method: 'PATCH',
+  const fieldPaths = Object.keys(encoded.fields);
+  const body = {
+    writes: [{
+      update: {
+        name: 'projects/' + PROJECT_ID + '/databases/(default)/documents/' + path,
+        fields: encoded.fields
+      },
+      updateMask: { fieldPaths: fieldPaths }
+    }]
+  };
+  const res = await fetch(BASE_URL.replace('/documents', '/documents:commit'), {
+    method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(encoded)
+    body: JSON.stringify(body)
   });
   if (!res.ok) throw new Error('HTTP ' + res.status);
   return res.json();
