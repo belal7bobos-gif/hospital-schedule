@@ -1,0 +1,1264 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>جدول النوبتجية</title>
+<style>
+  * { box-sizing: border-box; }
+  body { font-family: 'Segoe UI', Tahoma, Arial, sans-serif; background: #f4f6f8; margin: 0; padding: 14px 10px 40px; direction: rtl; }
+  h1 { text-align: center; color: #1f2d3d; font-size: 20px; margin: 4px 0 4px; }
+  h2 { text-align: center; color: #1f2d3d; font-size: 17px; }
+  .subtitle { text-align: center; color: #5a6b7b; font-size: 12px; margin-bottom: 14px; }
+  .card { background: white; border-radius: 10px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); padding: 16px; max-width: 480px; margin: 0 auto 12px; }
+  .rolebtn { display:block; width:100%; background:#2c5364; color:white; border:none; padding:14px; border-radius:8px; font-size:15px; margin-bottom:10px; cursor:pointer; }
+  .rolebtn.secondary { background:#5a7d8c; }
+  .field { display: flex; flex-direction: column; gap: 4px; margin-bottom: 10px; }
+  .field label { font-size: 12px; color: #5a6b7b; }
+  .field input, .field select { border: 1px solid #d3dae1; border-radius: 6px; padding: 9px 8px; font-size: 14px; font-family: inherit; background: #fbfcfd; }
+  .topbar { background: white; border-radius: 10px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); padding: 12px; margin-bottom: 12px; display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: center; }
+  .topbar .field { min-width: 130px; margin-bottom:0; }
+  .linkbox { max-width: 900px; margin: 0 auto 12px; background: #eef6ee; border: 1px solid #cfe8cf; border-radius: 8px; padding: 10px 12px; font-size: 12px; color: #2f5d33; text-align: center; word-break: break-all; }
+  .linkbox button { margin-top: 6px; background: #2c5364; color: white; border: none; padding: 5px 12px; border-radius: 5px; font-size: 12px; cursor: pointer; }
+  .status { text-align: center; font-size: 12px; color: #8a97a3; margin: 8px 0; min-height: 14px; }
+  .status.error { color: #c0392b; font-weight: bold; }
+  .status.ok { color: #2e7d32; font-weight: bold; }
+  .legend { text-align: center; color: #5a6b7b; font-size: 12px; margin-bottom: 12px; }
+  .legend span { display: inline-block; margin: 2px 4px; padding: 2px 8px; border-radius: 6px; }
+  .l1 { background: #d7f0dd; } .l2 { background: #dbe8fb; } .l3 { background: #fde3d2; } .l4 { background: #f1d9f7; }
+  .table-wrap { overflow-x: auto; background: white; border-radius: 8px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
+  table { border-collapse: collapse; min-width: 1400px; }
+  th, td { border: 1px solid #e2e6ea; text-align: center; padding: 2px; }
+  th.namecol, td.namecol { position: sticky; right: 0; min-width: 110px; font-size: 13px; }
+  th.namecol { background: #2c5364; color: white; z-index: 2; }
+  td.namecol { background: #eef3f7; color: #1f2d3d; z-index: 1; }
+  th { background: #2c5364; color: white; font-size: 11px; padding: 4px 2px; min-width: 46px; }
+  th .dnum { font-size: 13px; display:block; } th .dname { font-size: 10px; font-weight: normal; opacity: 0.85; }
+  td.cell { min-width: 46px; height: 40px; padding: 0; }
+  td.cell[contenteditable="true"] { outline: none; font-size: 12px; }
+  td.cell.locked { background:#f0f0f0; color:#888; }
+  td.cell:focus { background: #fff8dc; }
+  td.namecol[contenteditable="true"] { outline: none; text-align: center; padding-right: 4px; }
+  .delbtn { background: #e57373; color: white; border: none; border-radius: 4px; font-size: 10px; padding: 2px 6px; cursor: pointer; margin-top: 2px; }
+  .addrow { display: block; margin: 12px auto 0; background: #2c5364; color: white; border: none; padding: 8px 18px; border-radius: 6px; font-size: 14px; cursor: pointer; }
+  .savebtn { display:block; width:100%; max-width:400px; margin:16px auto; background:#2e7d32; color:white; border:none; padding:14px; border-radius:8px; font-size:16px; cursor:pointer; }
+  .savebtn:disabled { background:#aaa; }
+  .sharenote { text-align: center; font-size: 11px; color: #8a97a3; margin-top: 14px; }
+  .historybox { max-width:900px; margin:16px auto; background:white; border-radius:8px; padding:10px; font-size:12px; color:#5a6b7b; }
+  .historybox .item { border-bottom:1px solid #eee; padding:5px 0; }
+  .logoutbtn { position:fixed; top:8px; left:8px; background:#888; color:white; border:none; padding:6px 10px; border-radius:6px; font-size:11px; z-index:10; }
+  body.devtheme { background:#12181f; }
+  body.devtheme .topbar, body.devtheme .table-wrap, body.devtheme .linkbox, body.devtheme .historybox, body.devtheme #archivePanel, body.devtheme #usersPanel {
+    background:#1c2530; box-shadow:0 1px 4px rgba(0,0,0,0.4); color:#e6ecf2;
+  }
+  body.devtheme h1, body.devtheme .subtitle { color:#e6ecf2; }
+  body.devtheme .field label { color:#9db0c2; }
+  body.devtheme .field input, body.devtheme .field select { background:#0e1319; color:#e6ecf2; border-color:#334; }
+  body.devtheme .devbadge { display:inline-block; background:#c0392b; color:white; font-size:11px; padding:2px 8px; border-radius:10px; margin-right:6px; }
+  .userspanel-row { display:flex; flex-wrap:wrap; justify-content:space-between; align-items:center; gap:8px; padding:10px 4px; border-bottom:1px solid #333; font-size:12px; }
+  .userspanel-row > span:first-child { color:inherit; opacity:1; flex:1 1 auto; min-width:180px; }
+  .userspanel-row button, .userspanel-row select { opacity:1 !important; }
+  body.devtheme .userspanel-row { color:#e6ecf2; }
+</style>
+</head>
+<body>
+
+<div id="landingPage">
+  <h1>جدول النوبتجية</h1>
+  <div class="subtitle">مرحبًا بك</div>
+
+  <div class="card" id="quickLoginCard">
+    <h2>تسجيل الدخول</h2>
+    <div class="field"><label>الاسم الثلاثي</label><input id="quickLoginName" type="text"></div>
+    <div class="field"><label>كلمة السر</label><input id="quickLoginPassword" type="password"></div>
+    <div class="status" id="quickLoginStatus"></div>
+    <button class="rolebtn" onclick="doQuickLogin()">دخول</button>
+    <button class="rolebtn secondary" onclick="showRoleSelect()">تسجيل لأول مرة</button>
+  </div>
+
+  <div class="card" id="roleSelectCard" style="display:none;">
+    <h2>تسجيل لأول مرة - اختر صفتك الوظيفية</h2>
+    <button class="rolebtn" onclick="showLogin('nurse')">ممرض</button>
+    <button class="rolebtn" onclick="showLogin('supervisor')">مشرف قسم</button>
+    <button class="rolebtn" onclick="showLogin('head')">رئيسة التمريض</button>
+    <button class="rolebtn secondary" onclick="backToQuickLogin()">رجوع لتسجيل الدخول</button>
+  </div>
+
+  <div class="card" id="loginCard" style="display:none;">
+    <h2 id="loginTitle"></h2>
+    <div class="field"><label>الاسم الثلاثي</label><input id="loginName" type="text"></div>
+    <div class="field" id="loginHospitalField">
+      <label>اسم المستشفى</label>
+      <select id="loginHospitalSelect" style="display:none;"></select>
+      <input id="loginHospital" type="text" list="hospitalList" style="display:none;"><datalist id="hospitalList"></datalist>
+    </div>
+    <div class="field" id="loginDeptField">
+      <label>اسم القسم</label>
+      <select id="loginDeptSelect" style="display:none;"></select>
+      <input id="loginDept" type="text" list="deptList" style="display:none;"><datalist id="deptList"></datalist>
+    </div>
+    <div class="field"><label>كلمة السر</label><input id="loginPassword" type="password"></div>
+    <div class="status" id="loginStatus"></div>
+    <button class="rolebtn" onclick="doLogin()">تسجيل</button>
+    <button class="rolebtn secondary" onclick="backToQuickLogin()">رجوع</button>
+  </div>
+</div>
+
+<div id="appPage" style="display:none;">
+  <button class="logoutbtn" onclick="logout()">خروج</button>
+  <h1>جدول النوبتجية</h1>
+  <div class="subtitle" id="userLabel"></div>
+
+  <div class="topbar" id="topbarFields"></div>
+
+  <div class="linkbox" id="linkBox" style="display:none;">
+    ده لينك الشهر ده تحديدًا. ابعته لزملائك في نفس القسم وهيشوفوا نفس الشهر بالظبط:
+    <div id="deptLinkText" style="direction: ltr; margin-top:4px;"></div>
+    <button onclick="copyDeptLink()">نسخ اللينك</button>
+    <button onclick="toggleArchive()" id="archiveBtn" style="display:none; margin-right:6px;">الأرشيف</button>
+  </div>
+
+  <div id="archivePanel" style="display:none; max-width:900px; margin:0 auto 12px; background:white; border-radius:8px; box-shadow:0 1px 4px rgba(0,0,0,0.08); padding:10px;">
+    <div style="font-size:13px; font-weight:bold; color:#1f2d3d; margin-bottom:6px;">كل الأقسام والشهور المسجلة</div>
+    <div id="archiveList" style="font-size:12px; color:#5a6b7b;">جاري التحميل...</div>
+  </div>
+
+  <div class="status" id="statusMsg"></div>
+
+  <div class="legend">
+    اكتب في كل خانة: <span class="l1">صبح</span><span class="l2">نوبتجية</span><span class="l3">سهر</span><span class="l4">عطلة</span>
+  </div>
+
+  <div class="table-wrap">
+  <table id="scheduleTable">
+    <thead><tr id="headerRow"><th class="namecol">الاسم</th></tr></thead>
+    <tbody id="tableBody"></tbody>
+  </table>
+  </div>
+
+  <button class="addrow" id="addRowBtn" onclick="addRow('', null, true)" style="display:none;">+ إضافة اسم جديد</button>
+
+  <button class="savebtn" id="saveBtn" onclick="manualSave()">حفظ</button>
+
+  <div class="historybox" id="historyBox" style="display:none;">
+    <div style="font-weight:bold; margin-bottom:6px;">سجل التعديلات</div>
+    <div id="historyList"></div>
+  </div>
+
+  <div class="sharenote">كل قسم له جدوله الخاص، وكل شهر منفصل عن اللي قبله.</div>
+</div>
+
+<script>
+const PROJECT_ID = "hospital-schedule-29cef";
+const BASE_URL = "https://firestore.googleapis.com/v1/projects/" + PROJECT_ID + "/databases/default/documents";
+const monthNames = ["يناير","فبراير","مارس","أبريل","مايو","يونيو","يوليو","أغسطس","سبتمبر","أكتوبر","نوفمبر","ديسمبر"];
+const dayNames = ["الأحد","الاثنين","الثلاثاء","الأربعاء","الخميس","الجمعة","السبت"];
+
+function simpleHash(str) {
+  let h = 0;
+  for (let i = 0; i < str.length; i++) { h = ((h << 5) - h) + str.charCodeAt(i); h |= 0; }
+  return String(h);
+}
+function sanitizeId(name) {
+  const t = (name || '').trim();
+  if (!t) return 'عام';
+  return t.replace(/[\/\.\#\$\[\]]/g, '-').slice(0, 80);
+}
+
+// ---- Firestore REST helpers ----
+function encodeValue(v) {
+  if (v === null || v === undefined) return { nullValue: null };
+  if (typeof v === 'string') return { stringValue: v };
+  if (typeof v === 'number') return Number.isInteger(v) ? { integerValue: String(v) } : { doubleValue: v };
+  if (typeof v === 'boolean') return { booleanValue: v };
+  if (Array.isArray(v)) return { arrayValue: { values: v.map(encodeValue) } };
+  if (typeof v === 'object') {
+    const fields = {}; for (const k in v) fields[k] = encodeValue(v[k]);
+    return { mapValue: { fields: fields } };
+  }
+  return { nullValue: null };
+}
+function decodeValue(fv) {
+  if (!fv) return null;
+  if ('stringValue' in fv) return fv.stringValue;
+  if ('integerValue' in fv) return parseInt(fv.integerValue, 10);
+  if ('doubleValue' in fv) return fv.doubleValue;
+  if ('booleanValue' in fv) return fv.booleanValue;
+  if ('nullValue' in fv) return null;
+  if ('arrayValue' in fv) return (fv.arrayValue.values || []).map(decodeValue);
+  if ('mapValue' in fv) {
+    const obj = {}; const fields = fv.mapValue.fields || {};
+    for (const k in fields) obj[k] = decodeValue(fields[k]);
+    return obj;
+  }
+  return null;
+}
+function encodeDoc(obj) { const fields = {}; for (const k in obj) fields[k] = encodeValue(obj[k]); return { fields: fields }; }
+function decodeDoc(doc) { if (!doc || !doc.fields) return null; const obj = {}; for (const k in doc.fields) obj[k] = decodeValue(doc.fields[k]); return obj; }
+function encodePathForUrl(path) { return path.split('/').map(encodeURIComponent).join('/'); }
+
+async function getDoc(path) {
+  const res = await fetch(BASE_URL + '/' + encodePathForUrl(path), { cache: 'no-store' });
+  if (res.status === 404) return null;
+  if (!res.ok) throw new Error('HTTP ' + res.status);
+  return decodeDoc(await res.json());
+}
+async function setDoc(path, obj) {
+  const encoded = encodeDoc(obj);
+  const fieldPaths = Object.keys(encoded.fields);
+  const body = { writes: [{ update: { name: 'projects/' + PROJECT_ID + '/databases/default/documents/' + path, fields: encoded.fields }, updateMask: { fieldPaths: fieldPaths } }] };
+  const res = await fetch(BASE_URL.replace('/documents', '/documents:commit'), { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+  if (!res.ok) { let d = ''; try { d = await res.text(); } catch(e){} throw new Error('HTTP ' + res.status + (d ? ' - ' + d.slice(0,200) : '')); }
+  return res.json();
+}
+async function deleteDocByFullPath(fullPath) {
+  await fetch(BASE_URL.replace('/documents', '/documents:commit'), { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ writes: [{ delete: fullPath }] }) });
+}
+function genId() { return Date.now() + '-' + Math.random().toString(36).slice(2, 8); }
+async function softDelete(fullPath, data, type, summary) {
+  const trashId = genId();
+  const trashFullName = 'projects/' + PROJECT_ID + '/databases/default/documents/trash/' + trashId;
+  const trashFields = encodeDoc({ originalName: fullPath, data: data || {}, type: type, summary: summary || '', deletedAt: new Date().toLocaleString('ar-EG'), deletedBy: session ? session.name : '' }).fields;
+  await fetch(BASE_URL.replace('/documents', '/documents:commit'), {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ writes: [
+      { update: { name: trashFullName, fields: trashFields } },
+      { delete: fullPath }
+    ] })
+  });
+}
+async function softDeleteBatch(items) {
+  // items: [{fullPath, data, type, summary}]
+  const writes = [];
+  items.forEach(it => {
+    const trashId = genId();
+    const trashFullName = 'projects/' + PROJECT_ID + '/databases/default/documents/trash/' + trashId;
+    const trashFields = encodeDoc({ originalName: it.fullPath, data: it.data || {}, type: it.type, summary: it.summary || '', deletedAt: new Date().toLocaleString('ar-EG'), deletedBy: session ? session.name : '' }).fields;
+    writes.push({ update: { name: trashFullName, fields: trashFields } });
+    writes.push({ delete: it.fullPath });
+  });
+  if (!writes.length) return;
+  await fetch(BASE_URL.replace('/documents', '/documents:commit'), { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ writes: writes }) });
+}
+
+// ---- Session ----
+let session = null;
+try { session = JSON.parse(localStorage.getItem('nurseAppSession') || 'null'); } catch(e) {}
+
+function showRoleSelect() {
+  document.getElementById('quickLoginCard').style.display = 'none';
+  document.getElementById('roleSelectCard').style.display = 'block';
+}
+window.showRoleSelect = showRoleSelect;
+
+function backToQuickLogin() {
+  document.getElementById('loginCard').style.display = 'none';
+  document.getElementById('roleSelectCard').style.display = 'none';
+  document.getElementById('quickLoginCard').style.display = 'block';
+}
+window.backToQuickLogin = backToQuickLogin;
+
+function showLogin(role) {
+  document.getElementById('loginCard').style.display = 'block';
+  document.getElementById('roleSelectCard').style.display = 'none';
+  const titles = { nurse: 'تسجيل ممرض جديد', supervisor: 'تسجيل مشرف قسم جديد', head: 'تسجيل رئيسة تمريض جديدة' };
+  document.getElementById('loginTitle').textContent = titles[role];
+  window._pendingRole = role;
+
+  const hospSelect = document.getElementById('loginHospitalSelect');
+  const hospInput = document.getElementById('loginHospital');
+  const deptSelect = document.getElementById('loginDeptSelect');
+  const deptInput = document.getElementById('loginDept');
+
+  document.getElementById('loginHospitalField').style.display = 'block';
+  document.getElementById('loginDeptField').style.display = (role === 'head') ? 'none' : 'block';
+
+  if (role === 'head') {
+    // free-text: only head nurse can create a new hospital name
+    hospSelect.style.display = 'none'; hospInput.style.display = 'block';
+    hospInput.value = '';
+    loadHospitalDatalist();
+  } else {
+    // nurse & supervisor: must pick an existing hospital, cannot type a new one
+    hospInput.style.display = 'none'; hospSelect.style.display = 'block';
+    populateHospitalSelect(hospSelect);
+  }
+
+  if (role === 'supervisor') {
+    // free-text: only supervisor can create a new department
+    deptSelect.style.display = 'none'; deptInput.style.display = 'block';
+    deptInput.value = '';
+  } else if (role === 'nurse') {
+    // nurse: must pick an existing department under the chosen hospital
+    deptInput.style.display = 'none'; deptSelect.style.display = 'block';
+    deptSelect.innerHTML = '<option value="">اختر المستشفى أولاً</option>';
+    hospSelect.onchange = () => populateDeptSelect(deptSelect, hospSelect.value);
+  }
+}
+window.showLogin = showLogin;
+
+async function fetchAllUsers() {
+  const res = await fetch(BASE_URL.replace('/documents', '/documents:runQuery'), {
+    method: 'POST', headers: { 'Content-Type': 'application/json' }, cache: 'no-store',
+    body: JSON.stringify({ structuredQuery: { from: [{ collectionId: 'users' }] } })
+  });
+  const results = await res.json();
+  const users = [];
+  (results || []).forEach(r => { if (r.document) users.push(decodeDoc(r.document)); });
+  return users;
+}
+
+async function getRegistry() {
+  const d = await getDoc('settings/registry');
+  return d || { hospitals: [], departments: {} };
+}
+async function saveRegistry(reg) {
+  await setDoc('settings/registry', reg);
+}
+async function ensureRegistryItem(hospital, department) {
+  if (!hospital) return;
+  const reg = await getRegistry();
+  reg.hospitals = Array.from(new Set([...(reg.hospitals || []), hospital])).sort();
+  reg.departments = reg.departments || {};
+  if (!reg.departments[hospital]) reg.departments[hospital] = [];
+  if (department) reg.departments[hospital] = Array.from(new Set([...reg.departments[hospital], department])).sort();
+  await saveRegistry(reg);
+}
+async function populateHospitalSelect(selectEl) {
+  selectEl.innerHTML = '<option value="">جاري التحميل...</option>';
+  try {
+    const reg = await getRegistry();
+    const users = await fetchAllUsers();
+    const set = new Set(reg.hospitals || []);
+    users.forEach(d => { if (d.hospital) set.add(d.hospital); });
+    selectEl.innerHTML = '<option value="">اختر المستشفى</option>';
+    Array.from(set).sort().forEach(h => { const o=document.createElement('option'); o.value=h; o.textContent=h; selectEl.appendChild(o); });
+    if (!set.size) selectEl.innerHTML='<option value="">لا توجد مستشفيات مسجلة بعد</option>';
+  } catch(e) { selectEl.innerHTML='<option value="">تعذر تحميل القائمة</option>'; }
+}
+async function populateDeptSelect(selectEl, hospital) {
+  selectEl.innerHTML='<option value="">جاري التحميل...</option>';
+  if (!hospital) { selectEl.innerHTML='<option value="">اختر المستشفى أولاً</option>'; return; }
+  try {
+    const reg=await getRegistry(), users=await fetchAllUsers(), set=new Set((reg.departments||{})[hospital]||[]);
+    users.forEach(d=>{ if(d.hospital===hospital && d.department) set.add(d.department); });
+    selectEl.innerHTML='<option value="">اختر القسم</option>';
+    Array.from(set).sort().forEach(dd=>{const o=document.createElement('option');o.value=dd;o.textContent=dd;selectEl.appendChild(o);});
+    if(!set.size) selectEl.innerHTML='<option value="">لا توجد أقسام مسجلة في هذه المستشفى بعد</option>';
+  } catch(e){selectEl.innerHTML='<option value="">تعذر تحميل القائمة</option>';}
+}
+
+const FIXED_DEV_NAME = "بلال محمد محمد";
+const FIXED_DEV_PASSWORD = "Belalgx32";
+
+async function doQuickLogin() {
+  const name = document.getElementById('quickLoginName').value.trim();
+  const password = document.getElementById('quickLoginPassword').value;
+  const st = document.getElementById('quickLoginStatus');
+  if (!name || !password) { st.textContent = 'من فضلك اكتب الاسم وكلمة السر'; st.className = 'status error'; return; }
+
+  if (name === FIXED_DEV_NAME && password === FIXED_DEV_PASSWORD) {
+    session = { userId: 'dev-fixed', role: 'dev', name: FIXED_DEV_NAME, hospital: '', department: '' };
+    localStorage.setItem('nurseAppSession', JSON.stringify(session));
+    startApp();
+    return;
+  }
+
+  st.textContent = 'جاري التحقق...'; st.className = 'status';
+  try {
+    const res = await fetch(BASE_URL.replace('/documents', '/documents:runQuery'), {
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, cache: 'no-store',
+      body: JSON.stringify({ structuredQuery: { from: [{ collectionId: 'users' }], where: { fieldFilter: { field: { fieldPath: 'name' }, op: 'EQUAL', value: { stringValue: name } } } } })
+    });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const results = await res.json();
+    const hash = simpleHash(password);
+    let matched = null, matchedId = null;
+    (results || []).forEach(r => {
+      if (!r.document || matched) return;
+      const d = decodeDoc(r.document);
+      if (d.role !== 'dev' && d.passwordHash === hash) { matched = d; matchedId = r.document.name.split('/users/')[1]; }
+    });
+    if (!matched) { st.textContent = 'الاسم أو كلمة السر غير صحيحة'; st.className = 'status error'; return; }
+    session = { userId: matchedId, role: matched.role, name: matched.name, hospital: matched.hospital || '', department: matched.department || '' };
+    localStorage.setItem('nurseAppSession', JSON.stringify(session));
+    startApp();
+  } catch (e) {
+    st.textContent = 'حصل خطأ: ' + e.message; st.className = 'status error';
+  }
+}
+window.doQuickLogin = doQuickLogin;
+
+async function loadHospitalDatalist() {
+  try {
+    const res = await fetch(BASE_URL.replace('/documents', '/documents:runQuery'), {
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, cache: 'no-store',
+      body: JSON.stringify({ structuredQuery: { from: [{ collectionId: 'users' }] } })
+    });
+    const results = await res.json();
+    const set = new Set();
+    (results || []).forEach(r => { if (r.document) { const d = decodeDoc(r.document); if (d.hospital) set.add(d.hospital); } });
+    const dl = document.getElementById('hospitalList');
+    dl.innerHTML = '';
+    set.forEach(h => { const o = document.createElement('option'); o.value = h; dl.appendChild(o); });
+  } catch (e) {}
+}
+async function loadDeptDatalist(hospital) {
+  try {
+    const res = await fetch(BASE_URL.replace('/documents', '/documents:runQuery'), {
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, cache: 'no-store',
+      body: JSON.stringify({ structuredQuery: { from: [{ collectionId: 'users' }] } })
+    });
+    const results = await res.json();
+    const set = new Set();
+    (results || []).forEach(r => { if (r.document) { const d = decodeDoc(r.document); if (d.hospital === hospital && d.department) set.add(d.department); } });
+    const dl = document.getElementById('deptList');
+    dl.innerHTML = '';
+    set.forEach(dd => { const o = document.createElement('option'); o.value = dd; dl.appendChild(o); });
+  } catch (e) {}
+}
+
+async function doLogin() {
+  const role = window._pendingRole;
+  if (role === 'dev') { document.getElementById('loginStatus').textContent = 'غير مسموح بتسجيل حساب مطور جديد'; document.getElementById('loginStatus').className = 'status error'; return; }
+  const name = document.getElementById('loginName').value.trim();
+  const hospital = (role === 'head') ? document.getElementById('loginHospital').value.trim() : document.getElementById('loginHospitalSelect').value.trim();
+  const dept = (role === 'supervisor') ? document.getElementById('loginDept').value.trim() : (role === 'nurse' ? document.getElementById('loginDeptSelect').value.trim() : '');
+  const password = document.getElementById('loginPassword').value;
+  const st = document.getElementById('loginStatus');
+  const needsHospital = true;
+  const needsDept = role !== 'head';
+  if (!name || !password || (needsHospital && !hospital) || (needsDept && !dept)) {
+    st.textContent = 'من فضلك املأ كل الحقول المطلوبة'; st.className = 'status error'; return;
+  }
+  st.textContent = 'جاري التحقق...'; st.className = 'status';
+  const userId = role + '-' + sanitizeId(hospital) + '-' + (needsDept ? sanitizeId(dept) + '-' : '') + sanitizeId(name);
+  try {
+    const existing = await getDoc('users/' + userId);
+    const hash = simpleHash(password);
+    if (existing) {
+      if (existing.passwordHash !== hash) { st.textContent = 'كلمة السر غير صحيحة'; st.className = 'status error'; return; }
+      session = { userId, role, name, hospital: existing.hospital || '', department: existing.department || '' };
+    } else {
+      await setDoc('users/' + userId, { name, role, hospital, department: dept, passwordHash: hash, password: password, createdAt: Date.now() });
+      await ensureRegistryItem(hospital, dept);
+      session = { userId, role, name, hospital, department: dept };
+    }
+    localStorage.setItem('nurseAppSession', JSON.stringify(session));
+    startApp();
+  } catch (e) {
+    st.textContent = 'حصل خطأ: ' + e.message; st.className = 'status error';
+  }
+}
+window.doLogin = doLogin;
+
+function logout() {
+  localStorage.removeItem('nurseAppSession');
+  location.reload();
+}
+window.logout = logout;
+
+// ---- App state ----
+const monthSelect = document.getElementById.bind(document);
+let currentYear, currentMonth, deptName, deptId, hospitalName;
+let displayHospital = '', displayDept = '';
+let tableLocked = false;
+let historyEntries = [];
+
+function metaKey() { return sanitizeId(hospitalName) + '__' + sanitizeId(deptName); }
+function dataDocId(y, m) { return 'data-' + y + '-' + String(m).padStart(2, '0'); }
+function dataPath(y, m) { return 'departments/' + metaKey() + '/months/' + dataDocId(y, m); }
+
+const roleLabels = { nurse: 'ممرض', supervisor: 'مشرف قسم', head: 'رئيسة التمريض', dev: 'المطور' };
+const saveBtnLabels = { nurse: 'تأكيد', supervisor: 'اعتماد مشرف القسم', head: 'اعتماد رئيسة التمريض', dev: 'حفظ (مطور)' };
+
+function buildTopbar() {
+  const box = document.getElementById('topbarFields');
+  box.innerHTML = '';
+  function field(labelText, id, value, readonly) {
+    const wrap = document.createElement('div'); wrap.className = 'field';
+    const label = document.createElement('label'); label.textContent = labelText;
+    const input = document.createElement('input'); input.id = id; input.type = 'text'; input.value = value || '';
+    if (readonly) input.readOnly = true;
+    wrap.appendChild(label); wrap.appendChild(input); box.appendChild(wrap);
+    return input;
+  }
+  let hospInput, deptInput;
+  if (session.role === 'dev') {
+    hospInput = field('اسم المستشفى', 'hospitalDisplay', displayHospital || hospitalName, false);
+    hospInput.setAttribute('list','devHospitalList');
+    const dl=document.createElement('datalist'); dl.id='devHospitalList'; hospInput.parentNode.appendChild(dl);
+    populateDevRegistryLists();
+    const addH=document.createElement('button'); addH.textContent='+ مستشفى'; addH.style.cssText='font-size:11px; margin-top:3px;';
+    addH.onclick=addDeveloperHospital; hospInput.parentNode.appendChild(addH);
+  } else {
+    field('اسم المستشفى', 'hospitalDisplay', displayHospital || hospitalName, true);
+  }
+  if (session.role === 'head' || session.role === 'dev') {
+    deptInput = field('اسم القسم', 'deptDisplay', displayDept || deptName, false);
+    if(session.role==='dev'){
+      deptInput.setAttribute('list','devDeptList');
+      const dl=document.createElement('datalist'); dl.id='devDeptList'; deptInput.parentNode.appendChild(dl);
+      const addD=document.createElement('button'); addD.textContent='+ قسم'; addD.style.cssText='font-size:11px; margin-top:3px;';
+      addD.onclick=addDeveloperDepartment; deptInput.parentNode.appendChild(addD);
+    }
+  } else {
+    field('اسم القسم', 'deptDisplay', displayDept || deptName, true);
+  }
+  const monthWrap = document.createElement('div'); monthWrap.className = 'field';
+  const monthLabel = document.createElement('label'); monthLabel.textContent = 'الشهر';
+  const monthSel = document.createElement('select'); monthSel.id = 'monthSelect';
+  monthNames.forEach((n, i) => { const o = document.createElement('option'); o.value = i+1; o.textContent = n; monthSel.appendChild(o); });
+  monthSel.value = currentMonth;
+  monthWrap.appendChild(monthLabel); monthWrap.appendChild(monthSel); box.appendChild(monthWrap);
+
+  const yearWrap = document.createElement('div'); yearWrap.className = 'field';
+  const yearLabel = document.createElement('label'); yearLabel.textContent = 'السنة';
+  const yearInp = document.createElement('input'); yearInp.type = 'number'; yearInp.id = 'yearInput'; yearInp.value = currentYear;
+  yearWrap.appendChild(yearLabel); yearWrap.appendChild(yearInp); box.appendChild(yearWrap);
+
+  if (session.role === 'head' || session.role === 'dev') {
+    const goBtn = document.createElement('button');
+    goBtn.textContent = 'انتقال';
+    goBtn.style.cssText = 'background:#2c5364; color:white; border:none; border-radius:6px; padding:9px 14px; font-size:13px; cursor:pointer; align-self:flex-end;';
+    goBtn.onclick = () => {
+      if (hospInput) hospitalName = hospInput.value.trim();
+      if (deptInput) deptName = deptInput.value.trim();
+      currentYear = parseInt(yearInp.value,10); currentMonth = parseInt(monthSel.value,10);
+      reloadTable();
+    };
+    box.appendChild(goBtn);
+  } else {
+    monthSel.addEventListener('change', () => { currentYear = parseInt(yearInp.value,10); currentMonth = parseInt(monthSel.value,10); reloadTable(); });
+    yearInp.addEventListener('change', () => { const y = parseInt(yearInp.value,10); if (y>=2020&&y<=2100) { currentYear = y; reloadTable(); } });
+  }
+
+  if (session.role === 'dev') {
+    const renameBtn = document.createElement('button');
+    renameBtn.textContent = 'تصحيح الاسم';
+    renameBtn.style.cssText = 'background:#8e44ad; color:white; border:none; border-radius:6px; padding:9px 14px; font-size:13px; cursor:pointer; align-self:flex-end;';
+    renameBtn.onclick = renameCurrentTable;
+    box.appendChild(renameBtn);
+  }
+}
+
+async function populateDevRegistryLists(){
+  try{
+    const reg=await getRegistry();
+    const hdl=document.getElementById('devHospitalList');
+    if(hdl) hdl.innerHTML=(reg.hospitals||[]).map(x=>'<option value="'+x.replace(/"/g,'&quot;')+'">').join('');
+    const hospital=document.getElementById('hospitalDisplay')?.value.trim();
+    const ddl=document.getElementById('devDeptList');
+    if(ddl) ddl.innerHTML=((reg.departments||{})[hospital]||[]).map(x=>'<option value="'+x.replace(/"/g,'&quot;')+'">').join('');
+  }catch(e){}
+}
+async function addDeveloperHospital(){
+  const name=prompt('اكتب اسم المستشفى الجديد:'); if(!name||!name.trim()) return;
+  await ensureRegistryItem(name.trim(),'');
+  hospitalName=name.trim(); displayHospital=hospitalName;
+  buildTopbar(); alert('تمت إضافة المستشفى وستظهر فورًا للمستخدمين عند التسجيل.');
+}
+async function addDeveloperDepartment(){
+  const hospital=document.getElementById('hospitalDisplay')?.value.trim()||hospitalName;
+  if(!hospital){alert('اختر أو أضف المستشفى أولاً');return;}
+  const name=prompt('اكتب اسم القسم الجديد:'); if(!name||!name.trim()) return;
+  await ensureRegistryItem(hospital,name.trim());
+  hospitalName=hospital; deptName=name.trim(); displayHospital=hospital; displayDept=deptName;
+  buildTopbar(); alert('تمت إضافة القسم وسيظهر فورًا للمستخدمين.');
+}
+window.addDeveloperHospital=addDeveloperHospital; window.addDeveloperDepartment=addDeveloperDepartment;
+async function renameCurrentTable() {
+  const newHospital = prompt('الاسم الصحيح للمستشفى (هيتصحح النص الظاهر فقط، من غير ما يتغير مكان الجدول أو لينكه):', displayHospital || hospitalName);
+  if (newHospital === null) return;
+  const newDept = prompt('الاسم الصحيح للقسم:', displayDept || deptName);
+  if (newDept === null) return;
+  if (!newHospital.trim() || !newDept.trim()) { alert('الاسمين لازم ميكونوش فاضيين'); return; }
+  try {
+    const path = dataPath(currentYear, currentMonth);
+    const existing = await getDoc(path);
+    if (!existing) { alert('لا يوجد جدول محفوظ هنا لتعديل اسمه'); return; }
+    await setDoc(path, { hospital: newHospital.trim(), department: newDept.trim() });
+    displayHospital = newHospital.trim();
+    displayDept = newDept.trim();
+    alert('تم تصحيح الاسم بنجاح. اللينك ومكان الجدول متغيرش.');
+    buildTopbar();
+    reloadTable();
+  } catch (e) {
+    alert('حصل خطأ أثناء تصحيح الاسم: ' + e.message);
+  }
+}
+window.renameCurrentTable = renameCurrentTable;
+
+function buildHeader(year, month) {
+  const headerRow = document.getElementById('headerRow');
+  headerRow.innerHTML = '<th class="namecol">الاسم</th>';
+  const daysInMonth = new Date(year, month, 0).getDate();
+  for (let d = 1; d <= daysInMonth; d++) {
+    const date = new Date(year, month - 1, d);
+    const th = document.createElement('th');
+    th.innerHTML = '<span class="dnum">' + d + '</span><span class="dname">' + dayNames[date.getDay()] + '</span>';
+    headerRow.appendChild(th);
+  }
+  return daysInMonth;
+}
+
+function addRow(name, cells, focusName, locked, ownerId, transferred) {
+  const tableBody = document.getElementById('tableBody');
+  const daysInMonth = new Date(currentYear, currentMonth, 0).getDate();
+  const tr = document.createElement('tr');
+  tr.dataset.ownerId = ownerId || '';
+  tr.dataset.locked = locked ? '1' : '0';
+
+  const nameTd = document.createElement('td');
+  nameTd.className = 'namecol';
+  const canEditThisRow = canEditRow(locked, ownerId);
+  nameTd.contentEditable = canEditThisRow ? 'true' : 'false';
+  nameTd.textContent = name || '';
+  if (transferred) {
+    const badge = document.createElement('span');
+    badge.textContent = ' (تم نقله)';
+    badge.style.cssText = 'color:#c0392b; font-size:10px; font-weight:bold;';
+    nameTd.appendChild(badge);
+  }
+  tr.appendChild(nameTd);
+
+  for (let d = 0; d < daysInMonth; d++) {
+    const td = document.createElement('td');
+    td.className = 'cell' + (canEditThisRow ? '' : ' locked');
+    td.contentEditable = canEditThisRow ? 'true' : 'false';
+    td.textContent = (cells && cells[d]) ? cells[d] : '';
+    tr.appendChild(td);
+  }
+
+  if (session.role !== 'nurse' && canEditThisRow) {
+    const delTd = document.createElement('td'); delTd.style.border = 'none';
+    const delBtn = document.createElement('button'); delBtn.className = 'delbtn'; delBtn.textContent = 'حذف';
+    delBtn.onclick = () => tr.remove();
+    delTd.appendChild(delBtn); tr.appendChild(delTd);
+  }
+
+  tableBody.appendChild(tr);
+  if (focusName && canEditThisRow) nameTd.focus();
+}
+window.addRow = addRow;
+
+function canEditRow(locked, ownerId) {
+  if (session.role === 'head' || session.role === 'supervisor' || session.role === 'dev') return true;
+  if (session.role === 'nurse') return !locked && (!ownerId || ownerId === session.userId);
+  return false;
+}
+
+function collectRows() {
+  const rows = [];
+  document.getElementById('tableBody').querySelectorAll('tr').forEach(tr => {
+    const tds = tr.querySelectorAll('td.cell');
+    const nameTd = tr.querySelector('td.namecol');
+    const cells = []; tds.forEach(td => cells.push(td.textContent));
+    rows.push({ name: nameTd.textContent, cells: cells, locked: tr.dataset.locked === '1', ownerId: tr.dataset.ownerId || '' });
+  });
+  return rows;
+}
+
+function setStatus(text, type) {
+  const el = document.getElementById('statusMsg');
+  el.textContent = text; el.className = 'status' + (type ? ' ' + type : '');
+}
+
+function renderHistory(history) {
+  historyEntries = history || [];
+  const box = document.getElementById('historyBox');
+  const list = document.getElementById('historyList');
+  if (session.role === 'nurse' || historyEntries.length === 0) { box.style.display = 'none'; return; }
+  box.style.display = 'block';
+  list.innerHTML = '';
+  const indexed = historyEntries.map((h, i) => ({ h, i }));
+  indexed.slice().reverse().slice(0, 20).forEach(entry => {
+    const h = entry.h;
+    const div = document.createElement('div'); div.className = 'item';
+    div.style.cssText = 'display:flex; justify-content:space-between; align-items:center;';
+    const textSpan = document.createElement('span');
+    textSpan.textContent = (h.by || '') + ' (' + (roleLabels[h.role]||h.role) + ') - ' + (h.at || '') + ' - ' + (h.change || '');
+    div.appendChild(textSpan);
+    if (session.role === 'dev') {
+      const delBtn = document.createElement('button');
+      delBtn.textContent = 'حذف';
+      delBtn.style.cssText = 'background:#c0392b; color:white; border:none; border-radius:4px; padding:2px 8px; font-size:11px; margin-inline-start:6px;';
+      delBtn.onclick = () => deleteHistoryEntry(entry.i);
+      div.appendChild(delBtn);
+    }
+    list.appendChild(div);
+  });
+}
+
+async function deleteHistoryEntry(index) {
+  if (!confirm('متأكد إنك عايز تمسح السجل ده؟')) return;
+  try {
+    const newHistory = historyEntries.slice();
+    newHistory.splice(index, 1);
+    await setDoc(dataPath(currentYear, currentMonth), { history: newHistory });
+    renderHistory(newHistory);
+  } catch (e) {
+    alert('حصل خطأ أثناء الحذف: ' + e.message);
+  }
+}
+
+async function reloadTable() {
+  buildHeader(currentYear, currentMonth);
+  document.getElementById('tableBody').innerHTML = '';
+  setStatus('جاري التحميل...');
+  try {
+    const data = await getDoc(dataPath(currentYear, currentMonth));
+    displayHospital = (data && data.hospital) ? data.hospital : hospitalName;
+    displayDept = (data && data.department) ? data.department : deptName;
+    const rows = data ? data.rows : null;
+    renderHistory(data ? data.history : []);
+    if (session.role === 'nurse') {
+      document.getElementById('addRowBtn').style.display = 'none';
+      const myRow = (rows || []).find(r => r.ownerId === session.userId);
+      if (myRow) {
+        addRow(myRow.name, myRow.cells, false, myRow.locked, myRow.ownerId);
+        document.getElementById('saveBtn').disabled = !!myRow.locked;
+        if (myRow.locked) setStatus('تم تسجيل جدولك لهذا الشهر بالفعل. لا يمكن التعديل.', 'ok');
+        else setStatus('');
+      } else {
+        addRow(session.name, null, false, false, session.userId);
+        document.getElementById('saveBtn').disabled = false;
+        setStatus('');
+      }
+    } else {
+      document.getElementById('addRowBtn').style.display = 'inline-block';
+      if (rows && rows.length) {
+        for (const r of rows) {
+          let transferred = false;
+          if (r.ownerId) {
+            try {
+              const u = await getDoc('users/' + r.ownerId);
+              if (u && u.department && u.department !== deptName) transferred = true;
+            } catch (e) {}
+          }
+          addRow(r.name, r.cells, false, r.locked, r.ownerId, transferred);
+        }
+      } else addRow('', null, false, false, '');
+      document.getElementById('saveBtn').disabled = false;
+      setStatus('');
+    }
+  } catch (e) {
+    setStatus('تعذر تحميل الجدول: ' + e.message, 'error');
+    document.getElementById('tableBody').innerHTML = '';
+    if (session.role === 'nurse') addRow(session.name, null, false, false, session.userId);
+    else addRow('', null, false, false, '');
+  }
+  updateLinkUI();
+}
+
+function updateLinkUI() {
+  const url = new URL(window.location.href);
+  url.searchParams.set('hospital', hospitalName || '');
+  url.searchParams.set('dept', deptName || '');
+  url.searchParams.set('year', currentYear);
+  url.searchParams.set('month', currentMonth);
+  document.getElementById('deptLinkText').textContent = url.toString();
+  window.history.replaceState({}, '', url.toString());
+  document.getElementById('linkBox').style.display = 'block';
+  document.getElementById('archiveBtn').style.display = 'inline-block';
+}
+
+function copyDeptLink() {
+  navigator.clipboard.writeText(document.getElementById('deptLinkText').textContent).then(() => setStatus('تم نسخ اللينك ✓', 'ok')).catch(()=>{});
+}
+window.copyDeptLink = copyDeptLink;
+
+async function manualSave() {
+  const btn = document.getElementById('saveBtn');
+  btn.disabled = true;
+  setStatus('جاري الحفظ...');
+  try {
+    const existing = await getDoc(dataPath(currentYear, currentMonth));
+    let rows;
+    if (session.role === 'nurse') {
+      const myRowNow = collectRows()[0];
+      myRowNow.ownerId = session.userId;
+      myRowNow.locked = true;
+      const others = (existing && existing.rows) ? existing.rows.filter(r => r.ownerId !== session.userId) : [];
+      rows = others.concat([myRowNow]);
+    } else {
+      rows = collectRows();
+    }
+    const changeDesc = 'تحديث بيانات الجدول';
+    const history = (existing && existing.history) ? existing.history.slice() : [];
+    history.push({ by: session.name, role: session.role, at: new Date().toLocaleString('ar-EG'), change: changeDesc });
+    await setDoc(dataPath(currentYear, currentMonth), {
+      rows: rows, history: history, hospital: hospitalName, department: deptName, year: currentYear, month: currentMonth
+    });
+    setStatus('تم الحفظ ✓', 'ok');
+    await reloadTable();
+  } catch (e) {
+    setStatus('خطأ في الحفظ: ' + e.message, 'error');
+    btn.disabled = false;
+  }
+}
+window.manualSave = manualSave;
+
+document.getElementById('saveBtn').textContent = '';
+
+function startApp() {
+  document.getElementById('landingPage').style.display = 'none';
+  document.getElementById('appPage').style.display = 'block';
+  document.getElementById('userLabel').innerHTML = (session.role === 'dev' ? '<span class="devbadge">لوحة المطور</span>' : '') + session.name + ' - ' + roleLabels[session.role];
+  document.getElementById('saveBtn').textContent = saveBtnLabels[session.role];
+  if (session.role === 'dev') {
+    document.body.classList.add('devtheme');
+    injectUsersPanelButton();
+  }
+  if (session.role === 'head') {
+    injectTransferButton();
+  }
+  hospitalName = session.hospital;
+  deptName = session.department || '';
+
+  const urlParams = new URLSearchParams(window.location.search);
+  const now = new Date();
+  currentYear = urlParams.get('year') ? parseInt(urlParams.get('year'),10) : now.getFullYear();
+  currentMonth = urlParams.get('month') ? parseInt(urlParams.get('month'),10) : now.getMonth()+1;
+  if (session.role === 'head' && urlParams.get('dept')) deptName = urlParams.get('dept');
+  if (session.role === 'dev') {
+    if (urlParams.get('hospital')) hospitalName = urlParams.get('hospital');
+    if (urlParams.get('dept')) deptName = urlParams.get('dept');
+  }
+
+  buildTopbar();
+  if (session.role === 'dev' && (!hospitalName || !deptName)) {
+    setStatus('اختر اسم المستشفى والقسم من فوق للبدء.');
+    document.getElementById('tableBody').innerHTML = '';
+    document.getElementById('saveBtn').disabled = true;
+  } else {
+    reloadTable();
+  }
+}
+
+// ---- Archive (head nurse only) ----
+let archiveOpen = false;
+async function toggleArchive() {
+  const panel = document.getElementById('archivePanel');
+  archiveOpen = !archiveOpen;
+  panel.style.display = archiveOpen ? 'block' : 'none';
+  if (archiveOpen) await loadArchive();
+}
+window.toggleArchive = toggleArchive;
+
+async function loadArchive() {
+  const listEl = document.getElementById('archiveList');
+  listEl.textContent = 'جاري التحميل...';
+  try {
+    const res = await fetch(BASE_URL.replace('/documents', '/documents:runQuery'), {
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, cache: 'no-store',
+      body: JSON.stringify({ structuredQuery: { from: [{ collectionId: 'months', allDescendants: true }] } })
+    });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const results = await res.json();
+    const entries = [];
+    (results || []).forEach(r => {
+      if (!r.document) return;
+      const data = decodeDoc(r.document);
+      if (session.role === 'dev') {
+        // no filter — full access
+      } else if (session.role === 'head') {
+        if ((data.hospital || '') !== hospitalName) return;
+      } else {
+        // supervisor & nurse — own department only
+        if ((data.hospital || '') !== hospitalName || (data.department || '') !== deptName) return;
+      }
+      entries.push({ department: data.department || '', hospital: data.hospital || '', year: data.year, month: data.month, fullPath: r.document.name, data: data });
+    });
+    entries.sort((a,b) => (b.year-a.year) || (b.month-a.month));
+    if (!entries.length) { listEl.textContent = 'لسه مفيش جداول متسجلة.'; return; }
+    listEl.innerHTML = '';
+    entries.forEach(e => {
+      const row = document.createElement('div');
+      row.style.cssText = 'display:flex; justify-content:space-between; align-items:center; padding:6px 0; border-bottom:1px solid #eee;';
+      const label = document.createElement('span');
+      label.textContent = (session.role === 'dev' || session.role === 'head' ? (e.hospital + ' - ' + e.department) : e.department) + ' - ' + (monthNames[(e.month||1)-1]||'') + ' ' + (e.year||'');
+      const btns = document.createElement('span');
+      const canDelete = session.role === 'dev' || session.role === 'head';
+      const openBtn = document.createElement('button'); openBtn.textContent = 'فتح';
+      openBtn.style.cssText = 'margin-inline-start:6px; background:#2c5364; color:white; border:none; border-radius:4px; padding:3px 8px; font-size:11px;';
+      openBtn.onclick = () => {
+        if (session.role === 'dev') hospitalName = e.hospital;
+        deptName = e.department; currentYear = e.year; currentMonth = e.month;
+        buildTopbar(); reloadTable(); toggleArchive();
+      };
+      btns.appendChild(openBtn);
+      if (canDelete) {
+        const delBtn = document.createElement('button'); delBtn.textContent = 'حذف';
+        delBtn.style.cssText = 'margin-inline-start:6px; background:#e57373; color:white; border:none; border-radius:4px; padding:3px 8px; font-size:11px;';
+        delBtn.onclick = async () => {
+          if (!confirm('متأكد إنك عايز تمسح ' + label.textContent + '؟ (هينتقل لسلة المهملات ويمكن استرجاعه)')) return;
+          await softDelete(e.fullPath, e.data, 'table', label.textContent);
+          row.remove();
+        };
+        btns.appendChild(delBtn);
+      }
+      row.appendChild(label); row.appendChild(btns); listEl.appendChild(row);
+    });
+  } catch (e) {
+    listEl.textContent = 'تعذر تحميل الأرشيف: ' + e.message;
+  }
+}
+
+// ---- Users panel (developer only) ----
+function injectUsersPanelButton() {
+  const devBar = document.createElement('div');
+  devBar.style.cssText = 'max-width:900px; margin:0 auto 12px; text-align:center;';
+  const btn = document.createElement('button');
+  btn.textContent = 'عرض المستخدمين';
+  btn.style.cssText = 'background:#c0392b; color:white; border:none; padding:8px 16px; border-radius:6px; font-size:13px; cursor:pointer; margin-inline-end:8px;';
+  btn.onclick = toggleUsersPanel;
+  devBar.appendChild(btn);
+
+  const addUserBtn = document.createElement('button');
+  addUserBtn.textContent = 'إضافة مستخدم';
+  addUserBtn.style.cssText = 'background:#2e7d32; color:white; border:none; padding:8px 16px; border-radius:6px; font-size:13px; cursor:pointer; margin-inline-end:8px;';
+  addUserBtn.onclick = developerAddUser;
+  devBar.appendChild(addUserBtn);
+
+  const resetBtn = document.createElement('button');
+  resetBtn.textContent = 'ضبط المصنع للتطبيق';
+  resetBtn.style.cssText = 'background:#4a0e0e; color:white; border:none; padding:8px 16px; border-radius:6px; font-size:13px; cursor:pointer; margin-inline-end:8px;';
+  resetBtn.onclick = toggleResetPanel;
+  devBar.appendChild(resetBtn);
+
+  const trashBtn = document.createElement('button');
+  trashBtn.textContent = 'المهملات';
+  trashBtn.style.cssText = 'background:#6b7280; color:white; border:none; padding:8px 16px; border-radius:6px; font-size:13px; cursor:pointer;';
+  trashBtn.onclick = toggleTrashPanel;
+  devBar.appendChild(trashBtn);
+
+  document.getElementById('topbarFields').insertAdjacentElement('afterend', devBar);
+
+  const panel = document.createElement('div');
+  panel.id = 'usersPanel';
+  panel.style.cssText = 'display:none; max-width:900px; margin:0 auto 12px; background:white; border-radius:8px; box-shadow:0 1px 4px rgba(0,0,0,0.08); padding:10px;';
+  panel.innerHTML = '<div style="font-size:13px; font-weight:bold; margin-bottom:6px;">كل المستخدمين المسجلين (بيانات حساسة - للمطور فقط)</div><div id="usersList" style="font-size:12px;">جاري التحميل...</div>';
+  devBar.insertAdjacentElement('afterend', panel);
+
+  const resetPanel = document.createElement('div');
+  resetPanel.id = 'resetPanel';
+  resetPanel.style.cssText = 'display:none; max-width:600px; margin:0 auto 12px; background:#fff3f0; border:2px solid #c0392b; border-radius:8px; padding:14px; text-align:center;';
+  resetPanel.innerHTML =
+    '<div style="font-weight:bold; color:#c0392b; margin-bottom:10px;">⚠️ إجراءات كبيرة — هيتم نقل كل حاجة لسلة المهملات ويمكن استرجاعها من هناك</div>' +
+    '<button id="resetTablesBtn" style="display:block; width:100%; background:#c0392b; color:white; border:none; padding:10px; border-radius:6px; margin-bottom:8px; cursor:pointer;">مسح كل الجداول الموجودة بالتطبيق</button>' +
+    '<button id="resetAllBtn" style="display:block; width:100%; background:#4a0e0e; color:white; border:none; padding:10px; border-radius:6px; cursor:pointer;">مسح كل الجداول + كل حسابات المستخدمين</button>' +
+    '<div id="resetStatus" style="margin-top:10px; font-size:12px;"></div>';
+  panel.insertAdjacentElement('afterend', resetPanel);
+  document.getElementById('resetTablesBtn').onclick = () => runFactoryReset(false);
+  document.getElementById('resetAllBtn').onclick = () => runFactoryReset(true);
+
+  const trashPanel = document.createElement('div');
+  trashPanel.id = 'trashPanel';
+  trashPanel.style.cssText = 'display:none; max-width:900px; margin:0 auto 12px; background:white; border-radius:8px; box-shadow:0 1px 4px rgba(0,0,0,0.08); padding:10px;';
+  trashPanel.innerHTML = '<div style="font-size:13px; font-weight:bold; margin-bottom:6px;">سلة المهملات — استرجاع أي حاجة اتمسحت</div><div id="trashList" style="font-size:12px;">جاري التحميل...</div>';
+  resetPanel.insertAdjacentElement('afterend', trashPanel);
+}
+
+let trashPanelOpen = false;
+async function toggleTrashPanel() {
+  const panel = document.getElementById('trashPanel');
+  trashPanelOpen = !trashPanelOpen;
+  panel.style.display = trashPanelOpen ? 'block' : 'none';
+  if (trashPanelOpen) await loadTrashPanel();
+}
+
+async function loadTrashPanel() {
+  const listEl = document.getElementById('trashList');
+  listEl.textContent = 'جاري التحميل...';
+  try {
+    const res = await fetch(BASE_URL.replace('/documents', '/documents:runQuery'), {
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, cache: 'no-store',
+      body: JSON.stringify({ structuredQuery: { from: [{ collectionId: 'trash' }] } })
+    });
+    const results = await res.json();
+    const items = [];
+    (results || []).forEach(r => { if (r.document) items.push({ data: decodeDoc(r.document), trashId: r.document.name.split('/trash/')[1] }); });
+    if (!items.length) { listEl.textContent = 'سلة المهملات فاضية.'; return; }
+    listEl.innerHTML = '';
+    items.forEach(it => {
+      const d = it.data;
+      const row = document.createElement('div'); row.className = 'userspanel-row';
+      row.style.flexWrap = 'wrap'; row.style.gap = '6px';
+      const info = document.createElement('span');
+      info.textContent = (d.summary || d.type || '') + ' - اتمسح بمعرفة ' + (d.deletedBy||'') + ' - ' + (d.deletedAt||'');
+      row.appendChild(info);
+      const restoreBtn = document.createElement('button');
+      restoreBtn.textContent = 'استرجاع';
+      restoreBtn.style.cssText = 'background:#2e7d32; color:white; border:none; border-radius:4px; padding:3px 10px; font-size:11px;';
+      restoreBtn.onclick = async () => {
+        try {
+          const encoded = encodeDoc(d.data || {});
+          await fetch(BASE_URL.replace('/documents', '/documents:commit'), {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ writes: [
+              { update: { name: d.originalName, fields: encoded.fields } },
+              { delete: 'projects/' + PROJECT_ID + '/databases/default/documents/trash/' + it.trashId }
+            ] })
+          });
+          alert('تم الاسترجاع بنجاح');
+          row.remove();
+        } catch (e) { alert('حصل خطأ أثناء الاسترجاع: ' + e.message); }
+      };
+      row.appendChild(restoreBtn);
+      listEl.appendChild(row);
+    });
+  } catch (e) {
+    listEl.textContent = 'تعذر تحميل سلة المهملات: ' + e.message;
+  }
+}
+
+let resetPanelOpen = false;
+function toggleResetPanel() {
+  const panel = document.getElementById('resetPanel');
+  resetPanelOpen = !resetPanelOpen;
+  panel.style.display = resetPanelOpen ? 'block' : 'none';
+}
+
+async function runFactoryReset(alsoUsers) {
+  const warningText = alsoUsers ? 'هيتنقل كل الجداول وكل حسابات المستخدمين المسجلين لسلة المهملات (تقدر تسترجعهم بعدين).' : 'هيتنقل كل الجداول الموجودة بالتطبيق لسلة المهملات (تقدر تسترجعها بعدين).';
+  if (!confirm(warningText + ' متأكد؟')) return;
+  const typed = prompt('اكتب كلمة "تأكيد" بالظبط عشان تكملي:');
+  if (typed !== 'تأكيد') { alert('الإجراء اتلغى.'); return; }
+  const st = document.getElementById('resetStatus');
+  st.textContent = 'جاري التنفيذ...';
+  try {
+    const tablesRes = await fetch(BASE_URL.replace('/documents', '/documents:runQuery'), {
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, cache: 'no-store',
+      body: JSON.stringify({ structuredQuery: { from: [{ collectionId: 'months', allDescendants: true }] } })
+    });
+    const tablesResults = await tablesRes.json();
+    const items = [];
+    (tablesResults || []).forEach(r => {
+      if (!r.document) return;
+      const d = decodeDoc(r.document);
+      items.push({ fullPath: r.document.name, data: d, type: 'table', summary: (d.hospital||'') + ' - ' + (d.department||'') + ' - ' + (monthNames[(d.month||1)-1]||'') + ' ' + (d.year||'') });
+    });
+
+    if (alsoUsers) {
+      const usersRes = await fetch(BASE_URL.replace('/documents', '/documents:runQuery'), {
+        method: 'POST', headers: { 'Content-Type': 'application/json' }, cache: 'no-store',
+        body: JSON.stringify({ structuredQuery: { from: [{ collectionId: 'users' }] } })
+      });
+      const usersResults = await usersRes.json();
+      (usersResults || []).forEach(r => {
+        if (!r.document) return;
+        const d = decodeDoc(r.document);
+        items.push({ fullPath: r.document.name, data: d, type: 'user', summary: (d.name||'') + ' - ' + (roleLabels[d.role]||d.role) });
+      });
+    }
+    await softDeleteBatch(items);
+    st.textContent = 'تم النقل لسلة المهملات. عدد العناصر: ' + items.length;
+    if (alsoUsers) { alert('تم المسح بالكامل (منقول لسلة المهملات). هيتم تسجيل خروجك الآن.'); logout(); }
+    else { document.getElementById('archiveList').textContent = ''; }
+  } catch (e) {
+    st.textContent = 'حصل خطأ: ' + e.message;
+  }
+}
+
+let usersPanelOpen = false;
+async function toggleUsersPanel() {
+  const panel = document.getElementById('usersPanel');
+  usersPanelOpen = !usersPanelOpen;
+  panel.style.display = usersPanelOpen ? 'block' : 'none';
+  if (usersPanelOpen) await loadUsersPanel();
+}
+
+async function developerAddUser(){
+  const name=prompt('اسم المستخدم الثلاثي:'); if(!name||!name.trim()) return;
+  const password=prompt('كلمة السر:'); if(!password) return;
+  const role=prompt('الصفة: nurse أو supervisor أو head','nurse'); if(!['nurse','supervisor','head'].includes(role)) {alert('صفة غير صحيحة');return;}
+  const hospital=prompt('اسم المستشفى:'); if(!hospital||!hospital.trim()) return;
+  const department=role==='head'?'':prompt('اسم القسم:');
+  if(role!=='head' && (!department||!department.trim())) return;
+  const id=role+'-'+sanitizeId(hospital)+'-'+(department?sanitizeId(department)+'-':'')+sanitizeId(name);
+  await setDoc('users/'+id,{name:name.trim(),role,hospital:hospital.trim(),department:(department||'').trim(),passwordHash:simpleHash(password),password,createdAt:Date.now()});
+  await ensureRegistryItem(hospital.trim(),(department||'').trim());
+  alert('تم إنشاء المستخدم بنجاح.');
+  if(usersPanelOpen) loadUsersPanel();
+}
+async function loadUsersPanel() {
+  if (session.role !== 'dev') return;
+  const listEl = document.getElementById('usersList');
+  listEl.textContent = 'جاري التحميل...';
+  try {
+    const res = await fetch(BASE_URL.replace('/documents', '/documents:runQuery'), {
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, cache: 'no-store',
+      body: JSON.stringify({ structuredQuery: { from: [{ collectionId: 'users' }] } })
+    });
+    const results = await res.json();
+    const users = [];
+    (results || []).forEach(r => { if (r.document) users.push({ data: decodeDoc(r.document), id: r.document.name.split('/users/')[1] }); });
+    if (!users.length) { listEl.textContent = 'لا يوجد مستخدمين مسجلين.'; return; }
+    listEl.innerHTML = '';
+    users.forEach(u => {
+      const d = u.data;
+      const row = document.createElement('div'); row.className = 'userspanel-row';
+      row.style.flexWrap = 'wrap'; row.style.gap = '6px';
+
+      const info = document.createElement('span');
+      info.textContent = (d.name||'') + (d.hospital ? (' - ' + d.hospital) : '') + (d.department ? (' - ' + d.department) : '') + ' - كلمة السر: ' + (d.password || '—');
+      row.appendChild(info);
+
+      const controls = document.createElement('span');
+
+      const roleSelect = document.createElement('select');
+      roleSelect.style.cssText = 'font-size:11px; margin-inline-end:6px;';
+      ['nurse','supervisor','head'].forEach(r => {
+        const o = document.createElement('option'); o.value = r; o.textContent = roleLabels[r];
+        if (r === d.role) o.selected = true;
+        roleSelect.appendChild(o);
+      });
+      controls.appendChild(roleSelect);
+
+      const saveRoleBtn = document.createElement('button');
+      saveRoleBtn.textContent = 'حفظ الوظيفة';
+      saveRoleBtn.style.cssText = 'background:#2c5364; color:white; border:none; border-radius:4px; padding:3px 8px; font-size:11px; margin-inline-end:6px;';
+      saveRoleBtn.onclick = async () => {
+        try { await setDoc('users/' + u.id, { role: roleSelect.value }); alert('تم تحديث الوظيفة'); }
+        catch (e) { alert('حصل خطأ: ' + e.message); }
+      };
+      controls.appendChild(saveRoleBtn);
+
+      const editBtn = document.createElement('button');
+      editBtn.textContent = 'تعديل الاسم/السر';
+      editBtn.style.cssText = 'background:#8e44ad; color:white; border:none; border-radius:4px; padding:3px 8px; font-size:11px; margin-inline-end:6px;';
+      editBtn.onclick = async () => {
+        const newName=prompt('الاسم الجديد:',d.name||''); if(newName===null||!newName.trim()) return;
+        const newPass=prompt('كلمة السر الجديدة (اتركها كما هي بالضغط على إلغاء):',d.password||'');
+        const update={name:newName.trim()};
+        if(newPass!==null && newPass!==''){update.password=newPass;update.passwordHash=simpleHash(newPass);}
+        try{await setDoc('users/'+u.id,update);alert('تم تعديل بيانات المستخدم');loadUsersPanel();}catch(e){alert('حصل خطأ: '+e.message);}
+      };
+      controls.appendChild(editBtn);
+
+      const delBtn = document.createElement('button');
+      delBtn.textContent = 'حذف الحساب';
+      delBtn.style.cssText = 'background:#e57373; color:white; border:none; border-radius:4px; padding:3px 8px; font-size:11px;';
+      delBtn.onclick = async () => {
+        if (!confirm('متأكد إنك عايز تمسح حساب ' + (d.name||'') + '؟ (هينتقل لسلة المهملات)')) return;
+        try {
+          const fullPath = 'projects/' + PROJECT_ID + '/databases/default/documents/users/' + u.id;
+          await softDelete(fullPath, d, 'user', (d.name||'') + ' - ' + (roleLabels[d.role]||d.role));
+          row.remove();
+        } catch (e) { alert('حصل خطأ: ' + e.message); }
+      };
+      controls.appendChild(delBtn);
+
+      if (d.role === 'nurse' || d.role === 'supervisor') {
+        const transferSelect = document.createElement('select');
+        transferSelect.style.cssText = 'font-size:11px; margin-inline-start:6px;';
+        transferSelect.innerHTML = '<option value="">جاري التحميل...</option>';
+        populateDeptSelect(transferSelect, d.hospital);
+        controls.appendChild(transferSelect);
+
+        const transferBtn = document.createElement('button');
+        transferBtn.textContent = 'نقل لقسم آخر';
+        transferBtn.style.cssText = 'background:#8e44ad; color:white; border:none; border-radius:4px; padding:3px 8px; font-size:11px; margin-inline-start:6px;';
+        transferBtn.onclick = () => transferUser(u.id, d.name, d.department, transferSelect.value);
+        controls.appendChild(transferBtn);
+      }
+
+      row.appendChild(controls);
+      listEl.appendChild(row);
+    });
+  } catch (e) {
+    listEl.textContent = 'تعذر تحميل المستخدمين: ' + e.message;
+  }
+}
+
+async function transferUser(userId, userName, oldDept, newDept) {
+  if (!newDept) { alert('اختر القسم الجديد أولاً'); return; }
+  if (!confirm('متأكد إنك عايز تنقل ' + userName + ' للقسم "' + newDept + '"؟ جداوله السابقة هتفضل في أرشيف قسمه القديم فقط.')) return;
+  try {
+    await setDoc('users/' + userId, { department: newDept });
+    const transferId = genId();
+    await setDoc('transfers/' + transferId, {
+      userId: userId, name: userName, fromHospital: hospitalName, fromDept: oldDept || '', toDept: newDept,
+      transferredAt: new Date().toLocaleString('ar-EG'), by: session.name
+    });
+    alert('تم النقل بنجاح');
+  } catch (e) {
+    alert('حصل خطأ أثناء النقل: ' + e.message);
+  }
+}
+window.transferUser = transferUser;
+
+function injectTransferButton() {
+  const bar = document.createElement('div');
+  bar.style.cssText = 'max-width:900px; margin:0 auto 12px; text-align:center;';
+  const btn = document.createElement('button');
+  btn.textContent = 'نقل ممرض/مشرف لقسم آخر';
+  btn.style.cssText = 'background:#8e44ad; color:white; border:none; padding:8px 16px; border-radius:6px; font-size:13px; cursor:pointer;';
+  btn.onclick = toggleTransferPanel;
+  bar.appendChild(btn);
+  document.getElementById('topbarFields').insertAdjacentElement('afterend', bar);
+
+  const panel = document.createElement('div');
+  panel.id = 'transferPanel';
+  panel.style.cssText = 'display:none; max-width:900px; margin:0 auto 12px; background:white; border-radius:8px; box-shadow:0 1px 4px rgba(0,0,0,0.08); padding:10px;';
+  panel.innerHTML = '<div style="font-size:13px; font-weight:bold; margin-bottom:6px;">ممرضو ومشرفو مستشفاك</div><div id="transferList" style="font-size:12px;">جاري التحميل...</div>';
+  bar.insertAdjacentElement('afterend', panel);
+}
+
+let transferPanelOpen = false;
+async function toggleTransferPanel() {
+  const panel = document.getElementById('transferPanel');
+  transferPanelOpen = !transferPanelOpen;
+  panel.style.display = transferPanelOpen ? 'block' : 'none';
+  if (transferPanelOpen) await loadTransferPanel();
+}
+
+async function loadTransferPanel() {
+  const listEl = document.getElementById('transferList');
+  listEl.textContent = 'جاري التحميل...';
+  try {
+    const users = await fetchAllUsers();
+    const mine = users.filter(u => u.hospital === hospitalName && (u.role === 'nurse' || u.role === 'supervisor'));
+    if (!mine.length) { listEl.textContent = 'لا يوجد ممرضين أو مشرفين مسجلين في مستشفاك.'; return; }
+    listEl.innerHTML = '';
+    // need doc ids too, re-query raw
+    const res = await fetch(BASE_URL.replace('/documents', '/documents:runQuery'), {
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, cache: 'no-store',
+      body: JSON.stringify({ structuredQuery: { from: [{ collectionId: 'users' }] } })
+    });
+    const raw = await res.json();
+    const withIds = [];
+    (raw || []).forEach(r => { if (r.document) withIds.push({ data: decodeDoc(r.document), id: r.document.name.split('/users/')[1] }); });
+    withIds.filter(u => u.data.hospital === hospitalName && (u.data.role === 'nurse' || u.data.role === 'supervisor')).forEach(u => {
+      const d = u.data;
+      const row = document.createElement('div'); row.className = 'userspanel-row';
+      row.style.flexWrap = 'wrap'; row.style.gap = '6px';
+      const info = document.createElement('span');
+      info.textContent = d.name + ' - ' + roleLabels[d.role] + ' - القسم الحالي: ' + (d.department || '');
+      row.appendChild(info);
+      const controls = document.createElement('span');
+      const sel = document.createElement('select');
+      sel.style.cssText = 'font-size:11px; margin-inline-end:6px;';
+      sel.innerHTML = '<option value="">جاري التحميل...</option>';
+      populateDeptSelect(sel, hospitalName);
+      controls.appendChild(sel);
+      const btn = document.createElement('button');
+      btn.textContent = 'نقل';
+      btn.style.cssText = 'background:#8e44ad; color:white; border:none; border-radius:4px; padding:3px 8px; font-size:11px;';
+      btn.onclick = () => transferUser(u.id, d.name, d.department, sel.value);
+      controls.appendChild(btn);
+      row.appendChild(controls);
+      listEl.appendChild(row);
+    });
+  } catch (e) {
+    listEl.textContent = 'تعذر تحميل القائمة: ' + e.message;
+  }
+}
+
+// ---- Init ----
+if (session) startApp();
+</script>
+
+</body>
+</html>
